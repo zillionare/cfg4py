@@ -1,19 +1,55 @@
 """Main module."""
-import asyncio
-import collections
-import functools
+from collections import Mapping
 import json
 import logging.config
 import os
+import sys
+from apscheduler.schedulers.background import BackgroundScheduler
+import re
+from typing import Optional
 
-import yaml
-from watchdog.events import FileSystemEventHandler
+from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 from watchdog.observers import Observer
+from pyconfig.config import Config
 
 logger = logging.getLogger(__name__)
 
 
-def mixin(d, u):
+class RemoteConfigFetcher:
+    def fetch(self) -> dict:
+        raise NotImplementedError("sub class must implement this!")
+
+
+_sched = BackgroundScheduler()
+_remote_fetcher: Optional[RemoteConfigFetcher] = None
+_dump_on_change: bool = False
+
+# handle local configuration file change
+_local_observer = None
+_cfg_obj = Config()
+
+_local_config_dir: str = ''
+
+
+class RedisConfigFetcher(RemoteConfigFetcher):
+    def __init__(self, key: str, host: str = 'localhost', port: int = 6379, db: int = 0, **kwargs):
+        self.key = key
+        from redis import StrictRedis
+        self.client = StrictRedis(host, port=port, db=db, **kwargs)
+
+    def fetch(self) -> dict:
+        logger.info("fetching configuration from redis server")
+        settings = self.client.get(self.key)
+        return json.loads(settings, encoding='utf-8')
+
+
+class LocalConfigChangeHander(FileSystemEventHandler):
+    def dispatch(self, event):
+        if isinstance(event, FileModifiedEvent):
+            _load_from_local_file()
+
+
+def _mixin(d, u):
     """
     if  value x in "keyx:valuex" pair is list, it's will be replaced
     :param d:
@@ -21,124 +57,247 @@ def mixin(d, u):
     :return:
     """
     for k, v in u.items():
-        if isinstance(v, collections.Mapping):
-            d[k] = mixin(d.get(k, {}), v)
+        if isinstance(v, Mapping):
+            d[k] = _mixin(d.get(k, {}), v)
         else:
             d[k] = v
     return d
 
 
-class DictProxy(object):
-    def __init__(self, obj):
-        self.obj = obj
-
-    def __getitem__(self, key):
-        return wrap(self.obj[key])
-
-    def __getattr__(self, key):
-        try:
-            return wrap(getattr(self.obj, key))
-        except AttributeError:
-            try:
-                return self.get(key, None)
-            except KeyError:
-                raise AttributeError(key)
-
-
-class ListProxy(object):
-    def __init__(self, obj):
-        self.obj = obj
-
-    def __getitem__(self, key):
-        return wrap(self.obj[key])
-
-
-def wrap(value):
-    if isinstance(value, dict):
-        return DictProxy(value)
-    if isinstance(value, (tuple, list)):
-        return ListProxy(value)
-    return value
-
-
-class Config(FileSystemEventHandler):
-    def __init__(self):
-        self._cfg = {}
-        self._observer = None
-        self._path = None
-        self._change_handlers = set()
-
-    def __str__(self):
-        return json.dumps(self._cfg, indent=2)
-
-    def init(self, config_folder: str):
-        if os.path.isabs(config_folder):
-            self._path = config_folder
+def _to_obj(obj, conf: dict):
+    for key, value in conf.items():
+        if type(value) == dict:
+            _obj = Config()
+            setattr(obj, key, _obj)
+            _to_obj(_obj, value)
+            pass
         else:
-            self._path = os.path.join(os.path.expanduser('~'), config_folder)
+            setattr(obj, key, value)
 
-        self._load_from_local_file()
-        if self._observer:
-            self._observer.stop()
 
-        self._observer = Observer()
-        self._observer.schedule(self, self._path, recursive=True)
-        self._observer.start()
+def _refresh():
+    conf = _remote_fetcher.fetch()
+    update_config(conf)
 
-    def add_change_handler(self, handler):
-        self._change_handlers.add(handler)
 
-    def _load_from_local_file(self, show_config=False):
-        self._cfg = {}
-        role = os.getenv('SERVER_ROLE', 'DEV')
-        logger.info("server role is %s", role)
-        try:
-            with open(os.path.join(self._path, "base.yaml"), "r", encoding='utf-8') as base:
-                self._cfg = yaml.safe_load(base)
+def enable_logging(level=logging.INFO, log_file=None, file_size=10, file_count=7):
+    """
+    Enable basic log function for the application
 
-            if role == 'PRODUCTION':
-                with open(os.path.join(self._path, "production.yaml"), "r", encoding='utf-8') as prod:
-                    _prod = yaml.safe_load(prod)
-                    mixin(self._cfg, _prod)
+    if log_file is None, then it'll provide console logging, otherwise, the console logging is turned off, all
+    events will be logged into the provided file.
 
-            elif role == 'TEST':
-                with open(os.path.join(self._path, "test.yaml"), "r", encoding='utf-8') as test:
-                    _test = yaml.safe_load(test)
-                    mixin(self._cfg, _test)
+    Args:
+        level: the log level, one of logging.DEBUG, logging.INFO, logging.WARNING, logging.Error
+        log_file: the absolute file path for the log.
+        file_size: file size in MB unit
+        file_count: how many backup files leaved in disk
 
+    Returns:
+        None
+    """
+
+    assert file_count > 0
+    assert file_size > 0
+
+    from logging import handlers
+
+    formatter = logging.Formatter('%(asctime)s %(levelname)-1.1s %(filename)s:%(lineno)s | %(message)s')
+
+    logger = logging.getLogger()
+    logger.setLevel(level)
+
+    if log_file is None:
+        console = logging.StreamHandler()
+        console.setFormatter(formatter)
+        logger.addHandler(console)
+    else:
+        rotating_file = handlers.RotatingFileHandler(log_file, maxBytes=1024 * 1024 * file_size,
+                                                     backupCount=file_count)
+        rotating_file.setFormatter(formatter)
+        logger.addHandler(rotating_file)
+
+
+def config_remote_fetcher(fetcher: RemoteConfigFetcher, interval: int = 300):
+    """
+    config a remote configuration fetcher, which will pull the settings on every `refresh_interval`
+    Args:
+        fetcher: sub class of `RemoteConfigFetcher`
+        interval: how long should pyconig to pull the configuration from remote
+
+    Returns:
+
+    """
+    global _remote_fetcher
+    _remote_fetcher = fetcher
+
+    _sched.add_job(_refresh, 'interval', seconds=interval)
+    _sched.start()
+
+
+def build(save_to: str):
+    global _cfg_obj
+    lines = []
+    with open(os.path.join(os.path.dirname(__file__), "config.py"), "r") as origin:
+        lines = origin.readlines()
+
+    with open(save_to, encoding='utf-8', mode="w") as f:
+        lines = _schema_from_obj_(_cfg_obj, lines)
+        f.writelines("".join(lines))
+
+
+def _schema_from_obj_(obj, lines, depth: int = 0):
+    """
+    build a python file for auto-complete.
+    """
+    depth += 1
+    if isinstance(obj, Config):
+        for name in obj.__dict__.copy().keys():
+            if name.startswith("__"):
+                continue
+            child = getattr(obj, name)
+            if callable(child):
+                continue
+
+            if isinstance(child, Config):
+                lines.append(f"{' ' * 4 * depth}class {name}:\n")
+                _schema_from_obj_(child, lines, depth + 1)
             else:
-                try:
-                    with open(os.path.join(self._path, "dev.yaml"), "r", encoding='utf-8') as dev:
-                        _dev = yaml.safe_load(dev)
-                        mixin(self._cfg, _dev)
-                except FileNotFoundError:
-                    pass
+                _type = f"{type(child)}"
+                _type = re.sub(r".*\'(.*)\'>", r"\1", _type)
+                lines.append(f"{' ' * 4 * depth}{name}: Optional[{_type}] = None\n")
+    else:
+        print(obj)
 
-            if show_config:
-                logger.info("configuration is\n%s", json.dumps(self._cfg, indent=4, ensure_ascii=False))
-        except Exception as e:
-            logger.exception(e)
+    return lines
 
-    def on_modified(self, event):
-        self._load_from_local_file()
-        for handler in self._change_handlers:
-            handler(self)
 
-    def update(self, d):
-        mixin(self._cfg, d)
+def create_config(local_cfg_path: str = None, dump_on_change=True):
+    """
+    create cfg object.
+    Args:
+        local_cfg_path: the directory name where your configuration files exist
+        dump_on_change: if configuration is updated, whether or not to dump them into log file
 
-    def __getattr__(self, key):
-        value = self._cfg.get(key, None)
-        if isinstance(value, dict):
-            return DictProxy(self._cfg[key])
+    Returns:
+
+    """
+    global _local_config_dir, _dump_on_change, _remote_fetcher, _local_observer, _cfg_obj
+
+    _dump_on_change = dump_on_change
+    if local_cfg_path:
+        _local_config_dir = os.path.expanduser(local_cfg_path)
+
+        # handle local configuration file change
+        _local_observer = Observer()
+        _local_observer.schedule(LocalConfigChangeHander(), _local_config_dir, recursive=False)
+        _local_observer.start()
+
+        conf = _load_from_local_file()
+        update_config(conf)
+
+        # todo: will this overwrite existing file occasionally?
+        save_to = os.path.join(_local_config_dir, "pyconfig_auto_gen.py")
+        build(save_to)
+
+    return _cfg_obj
+
+
+def update_config(conf: dict):
+    global _cfg_obj
+
+    if 'logging' in conf:
+        _process_logging_settings(conf["logging"])
+
+        del conf['logging']
+
+    if _dump_on_change:
+        logger.info("configuration is\n%s", json.dumps(conf, indent=4, ensure_ascii=False))
+
+    _to_obj(_cfg_obj, conf)
+
+    return _cfg_obj
+
+
+def _process_logging_settings(conf: dict):
+    logging.config.dictConfig(conf)
+
+
+def _guess_loader():
+    files = os.listdir(_local_config_dir)
+    counter = {
+        ".yml":  0,
+        ".yaml": 0,
+        ".json": 0
+    }
+
+    for f in files:
+        _, ext = os.path.splitext(f)
+        if ext == '.yml':
+            counter[ext] += 1
+        elif ext == '.yaml':
+            counter[ext] += 1
+        elif ext == ".json":
+            counter[ext] += 1
+
+    _max = 0
+    ext = ''
+    for key in counter.keys():
+        if counter[key] > _max:
+            _max = counter[key]
+            ext = key
+
+    if ext in [".yml", ".yaml"]:
+        import yaml
+        return yaml.safe_load, ext
+    if ext in [".json"]:
+        return json.load, ext
+
+
+def _load_from_local_file() -> dict:
+    """
+    read configuration hierarchically from disk
+    Args:
+        show_config:
+
+    Returns:
+
+    Todo: add other known file format support with third-party parsers
+    """
+    conf = {}
+    role = os.getenv('__pyconfig_server_role__', '')
+    logger.info("server role is %s", role)
+
+    loader, ext = _guess_loader()
+    if role == '':
+        msg = "You must config enviroment variables __pyconfig_server_role__ as one of 'DEV, TEST, PRODUCTION'"
+        raise EnvironmentError(msg)
+    try:
+        with open(os.path.join(_local_config_dir, f"defaults{ext}"), "r", encoding='utf-8') as base:
+            conf = loader(base)
+
+        if role == 'PRODUCTION':
+            with open(os.path.join(_local_config_dir, f"production{ext}"), "r", encoding='utf-8') as prod:
+                _prod = loader(prod)
+                _mixin(conf, _prod)
+
+        elif role == 'TEST':
+            with open(os.path.join(_local_config_dir, f"test{ext}"), "r", encoding='utf-8') as test:
+                _test = loader(test)
+                _mixin(conf, _test)
+
         else:
-            return value
+            try:
+                with open(os.path.join(_local_config_dir, f"dev{ext}"), "r", encoding='utf-8') as dev:
+                    _dev = loader(dev)
+                    _mixin(conf, _dev)
+            except FileNotFoundError:
+                pass
 
-    def __getitem__(self, item):
-        return self._cfg.get(item, None)
+    except Exception as e:
+        logger.exception(e)
 
+    return conf
 
-
-cfg = Config()
-
-__all__ = ['cfg']
+def config_server(role:str):
+    print("Not implemented yet.")

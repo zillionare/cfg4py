@@ -1,0 +1,11 @@
+logging:
+  handlers:
+    file:
+      filename: /tmp/pyconfig.demo.log
+  root:
+    level: INFO
+    handlers: [file]
+
+services:
+    redis:
+        host: 127.0.0.1
