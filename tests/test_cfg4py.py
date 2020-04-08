@@ -3,6 +3,7 @@
 """Tests for `cfg4py` package."""
 
 import unittest
+import os
 
 from cfg4py import cfg4py
 import logging
@@ -16,6 +17,8 @@ class TestCfg4Py(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures, if any."""
         cfg4py.enable_logging()
+        self.resource_path = os.path.join(os.path.dirname(__file__), "../cfg4py/resources/")
+        self.resource_path = os.path.normpath(self.resource_path)
 
     def tearDown(self):
         """Tear down test fixtures, if any."""
@@ -25,11 +28,8 @@ class TestCfg4Py(unittest.TestCase):
         import os
         os.environ['__cfg4py_server_role__'] = 'DEV'
 
-        path = os.path.join(os.path.dirname(__file__), "../cfg4py/resources/")
-        path = os.path.normpath(path)
-
-        logger.info("path is %s", path)
-        cfg = cfg4py.create_config(path)
+        logger.info("resource_path is %s", self.resource_path)
+        cfg = cfg4py.create_config(self.resource_path)
         self.assertEqual(cfg.services.redis.host, '127.0.0.1')
 
     def test_001_update_config(self):
@@ -77,7 +77,7 @@ class TestCfg4Py(unittest.TestCase):
         import os
         # from cfg4py.resources.config import Config
         os.environ['__cfg4py_server_role__'] = 'DEV'
-        cfg = cfg4py.create_config('/workspace/cfg4py/cfg4py/resources')
+        cfg = cfg4py.create_config(self.resource_path)
         print("cfg.services.redis.host is", cfg.services.redis.host)
 
     def test_003_config_remote_fetcher(self):

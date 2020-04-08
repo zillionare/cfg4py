@@ -46,7 +46,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/jieyu_tech/cfg4py',
-    version='0.2.0',
+    version='0.1.1',
     zip_safe=False,
     entry_points = {
         'console_scripts': ['cfg4py=cfg4py.command_line:main']
