@@ -1,5 +1,4 @@
 """Top-level package for Cfg4Py."""
-import json
 from cfg4py.cfg4py import (
     RemoteConfigFetcher, enable_logging, config_remote_fetcher, create_config,
     update_config, RedisConfigFetcher, config_server)

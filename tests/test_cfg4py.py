@@ -34,7 +34,7 @@ class TestCfg4Py(unittest.TestCase):
 
     def test_001_update_config(self):
         conf = {
-            "aaron":    {
+            "aaron": {
                 "surname": "yang"
             },
             "services": {
@@ -70,7 +70,7 @@ class TestCfg4Py(unittest.TestCase):
             from cfg4py_auto_gen import Config
             # no exception means the file has been generated successfully
             self.assertTrue(True)
-        except Exception as e:
+        except Exception:
             self.assertTrue(False)
 
     def test_002_create_config(self):

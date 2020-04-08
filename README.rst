@@ -54,7 +54,7 @@ Watching configuration change
 and update automatically.
 
 Autocomplete prompt
-------------
+-------------------
 It's hard to remember all configuration keys. To ease the use and prevent from using wrong keys, cfg4py provide
 mechanism to leverage IDE's auto-complete function. You just need write your configuration files in supported format
 (currently json and yaml), then call `cfg4py.build`, this will build a python class file, and IDE can leverage it

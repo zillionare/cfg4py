@@ -1,0 +1,38 @@
+cfg4py package
+==============
+
+Submodules
+----------
+
+cfg4py.cfg4py module
+--------------------
+
+.. automodule:: cfg4py.cfg4py
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cfg4py.command\_line module
+---------------------------
+
+.. automodule:: cfg4py.command_line
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+cfg4py.config module
+--------------------
+
+.. automodule:: cfg4py.config
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+
+Module contents
+---------------
+
+.. automodule:: cfg4py
+   :members:
+   :undoc-members:
+   :show-inheritance:

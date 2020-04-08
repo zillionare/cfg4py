@@ -1,5 +1,5 @@
 cfg4py
-========
+======
 
 .. toctree::
    :maxdepth: 4

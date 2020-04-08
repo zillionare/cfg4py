@@ -140,6 +140,7 @@ def build(save_to: str):
     global _cfg_obj
     with open(os.path.join(os.path.dirname(__file__), "config.py"), "r") as origin:
         lines = origin.readlines()
+        lines.append("\n")
 
     with open(save_to, encoding='utf-8', mode="w") as f:
         lines = _schema_from_obj_(_cfg_obj, lines)
@@ -161,7 +162,7 @@ def _schema_from_obj_(obj, lines, depth: int = 0):
 
             if isinstance(child, Config):
                 lines.append(f"{' ' * 4 * depth}class {name}:\n")
-                _schema_from_obj_(child, lines, depth + 1)
+                _schema_from_obj_(child, lines, depth)
             else:
                 _type = f"{type(child)}"
                 _type = re.sub(r".*\'(.*)\'>", r"\1", _type)

@@ -1,5 +1,6 @@
 from typing import Optional
 
+
 class Config(object):
     __access_counter__ = 0
 

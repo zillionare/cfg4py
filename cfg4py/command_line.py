@@ -1,4 +1,4 @@
-from cfg4py import config_server, create_config
+from cfg4py import config_server, create_config, update_config
 import fire
 
 
@@ -22,11 +22,19 @@ def build(config_dir: str):
         sys.exit(-1)
 
     try:
-        create_config(config_dir)
+        cfg = create_config(config_dir)
         sys.path.insert(0, config_dir)
         # noinspection PyUnresolvedReferences
         from cfg4py_auto_gen import Config
         print(f"Config file is built with success and saved at {os.path.join(config_dir, 'cfg4py_auto_gen')}")
+        cfg: Config = update_config({
+            "services": {
+                "redis": {
+                    "host": '192.168.1.1'
+                }
+            }
+        })
+        print(f"update config success, now cfg.services.redis.host is {cfg.services.redis.host}")
     except Exception as e:
         print(e)
         print("Config file built failure.")
