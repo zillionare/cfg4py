@@ -3,7 +3,7 @@ from typing import Optional
 class Config(object):
     __access_counter__ = 0
 
-    def __pyconfig_reset_access_counter__(self):
+    def __cfg4py_reset_access_counter__(self):
         self.__access_counter__ = 0
 
     def __getattribute__(self, name):

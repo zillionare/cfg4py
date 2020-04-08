@@ -1,7 +1,7 @@
-pyconfig
+cfg4py
 ========
 
 .. toctree::
    :maxdepth: 4
 
-   pyconfig
+   cfg4py

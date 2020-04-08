@@ -1,7 +1,7 @@
 logging:
   handlers:
     file:
-      filename: /tmp/pyconfig.demo.log
+      filename: /tmp/cfg4py.demo.log
   root:
     level: INFO
     handlers: [file]

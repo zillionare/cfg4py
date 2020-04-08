@@ -25,5 +25,5 @@ deploy:
     secure: PLEASE_REPLACE_ME
   on:
     tags: true
-    repo: jieyu_tech/pyconfig
+    repo: jieyu_tech/cfg4py
     python: 3.8

@@ -1,4 +1,4 @@
-Welcome to PyConfig's documentation!
+Welcome to Cfg4Py's documentation!
 ======================================
 
 .. toctree::

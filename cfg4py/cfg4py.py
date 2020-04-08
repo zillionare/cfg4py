@@ -1,16 +1,16 @@
 """Main module."""
-from collections import Mapping
 import json
 import logging.config
 import os
-import sys
-from apscheduler.schedulers.background import BackgroundScheduler
 import re
+from collections import Mapping
 from typing import Optional
 
+from apscheduler.schedulers.background import BackgroundScheduler
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 from watchdog.observers import Observer
-from pyconfig.config import Config
+
+from cfg4py.config import Config
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class RemoteConfigFetcher:
         raise NotImplementedError("sub class must implement this!")
 
 
-_sched = BackgroundScheduler()
+_scheduler = BackgroundScheduler()
 _remote_fetcher: Optional[RemoteConfigFetcher] = None
 _dump_on_change: bool = False
 
@@ -34,6 +34,7 @@ _local_config_dir: str = ''
 class RedisConfigFetcher(RemoteConfigFetcher):
     def __init__(self, key: str, host: str = 'localhost', port: int = 6379, db: int = 0, **kwargs):
         self.key = key
+        # noinspection PyPackageRequirements
         from redis import StrictRedis
         self.client = StrictRedis(host, port=port, db=db, **kwargs)
 
@@ -43,7 +44,7 @@ class RedisConfigFetcher(RemoteConfigFetcher):
         return json.loads(settings, encoding='utf-8')
 
 
-class LocalConfigChangeHander(FileSystemEventHandler):
+class LocalConfigChangeHandler(FileSystemEventHandler):
     def dispatch(self, event):
         if isinstance(event, FileModifiedEvent):
             _load_from_local_file()
@@ -104,18 +105,18 @@ def enable_logging(level=logging.INFO, log_file=None, file_size=10, file_count=7
 
     formatter = logging.Formatter('%(asctime)s %(levelname)-1.1s %(filename)s:%(lineno)s | %(message)s')
 
-    logger = logging.getLogger()
-    logger.setLevel(level)
+    _logger = logging.getLogger()
+    _logger.setLevel(level)
 
     if log_file is None:
         console = logging.StreamHandler()
         console.setFormatter(formatter)
-        logger.addHandler(console)
+        _logger.addHandler(console)
     else:
         rotating_file = handlers.RotatingFileHandler(log_file, maxBytes=1024 * 1024 * file_size,
                                                      backupCount=file_count)
         rotating_file.setFormatter(formatter)
-        logger.addHandler(rotating_file)
+        _logger.addHandler(rotating_file)
 
 
 def config_remote_fetcher(fetcher: RemoteConfigFetcher, interval: int = 300):
@@ -123,7 +124,7 @@ def config_remote_fetcher(fetcher: RemoteConfigFetcher, interval: int = 300):
     config a remote configuration fetcher, which will pull the settings on every `refresh_interval`
     Args:
         fetcher: sub class of `RemoteConfigFetcher`
-        interval: how long should pyconig to pull the configuration from remote
+        interval: how long should cfg4py to pull the configuration from remote
 
     Returns:
 
@@ -131,13 +132,12 @@ def config_remote_fetcher(fetcher: RemoteConfigFetcher, interval: int = 300):
     global _remote_fetcher
     _remote_fetcher = fetcher
 
-    _sched.add_job(_refresh, 'interval', seconds=interval)
-    _sched.start()
+    _scheduler.add_job(_refresh, 'interval', seconds=interval)
+    _scheduler.start()
 
 
 def build(save_to: str):
     global _cfg_obj
-    lines = []
     with open(os.path.join(os.path.dirname(__file__), "config.py"), "r") as origin:
         lines = origin.readlines()
 
@@ -190,14 +190,14 @@ def create_config(local_cfg_path: str = None, dump_on_change=True):
 
         # handle local configuration file change
         _local_observer = Observer()
-        _local_observer.schedule(LocalConfigChangeHander(), _local_config_dir, recursive=False)
+        _local_observer.schedule(LocalConfigChangeHandler(), _local_config_dir, recursive=False)
         _local_observer.start()
 
         conf = _load_from_local_file()
         update_config(conf)
 
         # todo: will this overwrite existing file occasionally?
-        save_to = os.path.join(_local_config_dir, "pyconfig_auto_gen.py")
+        save_to = os.path.join(_local_config_dir, "cfg4py_auto_gen.py")
         build(save_to)
 
     return _cfg_obj
@@ -248,6 +248,7 @@ def _guess_loader():
             ext = key
 
     if ext in [".yml", ".yaml"]:
+        # noinspection PyPackageRequirements
         import yaml
         return yaml.safe_load, ext
     if ext in [".json"]:
@@ -258,19 +259,18 @@ def _load_from_local_file() -> dict:
     """
     read configuration hierarchically from disk
     Args:
-        show_config:
 
     Returns:
 
     Todo: add other known file format support with third-party parsers
     """
     conf = {}
-    role = os.getenv('__pyconfig_server_role__', '')
+    role = os.getenv('__cfg4py_server_role__', '')
     logger.info("server role is %s", role)
 
     loader, ext = _guess_loader()
     if role == '':
-        msg = "You must config enviroment variables __pyconfig_server_role__ as one of 'DEV, TEST, PRODUCTION'"
+        msg = "You must config environment variables __cfg4py_server_role__ as one of 'DEV, TEST, PRODUCTION'"
         raise EnvironmentError(msg)
     try:
         with open(os.path.join(_local_config_dir, f"defaults{ext}"), "r", encoding='utf-8') as base:
@@ -299,5 +299,7 @@ def _load_from_local_file() -> dict:
 
     return conf
 
-def config_server(role:str):
+
+# noinspection PyUnusedLocal
+def config_server(role: str):
     print("Not implemented yet.")

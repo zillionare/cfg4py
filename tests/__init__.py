@@ -1,1 +1,1 @@
-"""Unit test package for pyconfig."""
+"""Unit test package for cfg4py."""

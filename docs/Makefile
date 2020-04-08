@@ -4,7 +4,7 @@
 # You can set these variables from the command line.
 SPHINXOPTS    =
 SPHINXBUILD   = python -msphinx
-SPHINXPROJ    = pyconfig
+SPHINXPROJ    = cfg4py
 SOURCEDIR     = .
 BUILDDIR      = _build
 

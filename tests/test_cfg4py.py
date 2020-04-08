@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 
-"""Tests for `pyconfig` package."""
+"""Tests for `cfg4py` package."""
 
 import unittest
 
-from pyconfig import pyconfig
+from cfg4py import cfg4py
 import logging
 
 logger = logging.getLogger(__name__)
 
 
-class TestPyconfig(unittest.TestCase):
-    """Tests for `pyconfig` package."""
+class TestCfg4Py(unittest.TestCase):
+    """Tests for `cfg4py` package."""
 
     def setUp(self):
         """Set up test fixtures, if any."""
-        pyconfig.enable_logging()
+        cfg4py.enable_logging()
 
     def tearDown(self):
         """Tear down test fixtures, if any."""
@@ -23,13 +23,13 @@ class TestPyconfig(unittest.TestCase):
     def test_000_create_config(self):
         """Test something."""
         import os
-        os.environ['__pyconfig_server_role__'] = 'DEV'
+        os.environ['__cfg4py_server_role__'] = 'DEV'
 
-        path = os.path.join(os.path.dirname(__file__), "../pyconfig/resources/")
+        path = os.path.join(os.path.dirname(__file__), "../cfg4py/resources/")
         path = os.path.normpath(path)
 
         logger.info("path is %s", path)
-        cfg = pyconfig.create_config(path)
+        cfg = cfg4py.create_config(path)
         self.assertEqual(cfg.services.redis.host, '127.0.0.1')
 
     def test_001_update_config(self):
@@ -44,7 +44,7 @@ class TestPyconfig(unittest.TestCase):
             }
         }
 
-        cfg = pyconfig.update_config(conf)
+        cfg = cfg4py.update_config(conf)
         self.assertEqual('localhost', cfg.services.redis.host)
 
     def test_001_build(self):
@@ -60,14 +60,14 @@ class TestPyconfig(unittest.TestCase):
             }
         }
 
-        pyconfig.update_config(conf)
+        cfg4py.update_config(conf)
         save_to = "/tmp/"
-        pyconfig.build(os.path.join(save_to, "pyconfig_auto_gen.py"))
+        cfg4py.build(os.path.join(save_to, "cfg4py_auto_gen.py"))
         try:
             import sys
             sys.path.insert(0, save_to)
             # noinspection PyUnresolvedReferences
-            from pyconfig_auto_gen import Config
+            from cfg4py_auto_gen import Config
             # no exception means the file has been generated successfully
             self.assertTrue(True)
         except Exception as e:
@@ -75,13 +75,13 @@ class TestPyconfig(unittest.TestCase):
 
     def test_002_create_config(self):
         import os
-        # from pyconfig.resources.config import Config
-        os.environ['__pyconfig_server_role__'] = 'DEV'
-        cfg = pyconfig.create_config('/workspace/pyconfig/pyconfig/resources')
+        # from cfg4py.resources.config import Config
+        os.environ['__cfg4py_server_role__'] = 'DEV'
+        cfg = cfg4py.create_config('/workspace/cfg4py/cfg4py/resources')
         print("cfg.services.redis.host is", cfg.services.redis.host)
 
     def test_003_config_remote_fetcher(self):
-        from pyconfig import RedisConfigFetcher
+        from cfg4py import RedisConfigFetcher
         from redis import StrictRedis
         import json
         r = StrictRedis('localhost')
@@ -93,10 +93,10 @@ class TestPyconfig(unittest.TestCase):
             }
         }))
 
-        cfg = pyconfig.create_config()
+        cfg = cfg4py.create_config()
         fetcher = RedisConfigFetcher(key="my_app_config")
         logger.info("configuring a remote fetcher")
-        pyconfig.config_remote_fetcher(fetcher, 1)
+        cfg4py.config_remote_fetcher(fetcher, 1)
         import time
         time.sleep(2)
         logger.info("please check log output to see if update_config is called at least 1 once")
