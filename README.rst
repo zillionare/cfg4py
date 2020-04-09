@@ -15,7 +15,7 @@ Overview
 * Free software: BSD license
 * Documentation: https://cfg4py.readthedocs.io.
 
-.. image:: static/usage.gif
+.. image:: docs/static/usage.gif
 
 A python config module that:
 
