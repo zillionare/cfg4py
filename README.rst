@@ -34,14 +34,15 @@ You have a bunch of severs of the same role, which usually share same configurat
 
 This is how Cfg4Py solves the problem:
 
-1. Configure your application general settings at remote service, then implement a RemoteConfigFetcher_ (Cfg4Py has already implemented one), which pull configuration from remote serivce periodically.
+1. Configure your application general settings at remote service, then implement a `RemoteConfigFetcher` (Cfg4Py has already implemented one), which pull configuration from remote serivce periodically.
 2. Change the settings resides on local machine, then the change automatically applied.
 
-The hierarchical design can hanve different meaning. It's common to see that you have different settings for development, test and production site. They share many common settings, but a few of them has to be different. Cfg4Py has perfect solution supporting for this: adaptive deployment environment support.
+The hierarchical design can have different meaning. It's common to see that you have different settings for development,
+test and production site. They share many common settings, but a few of them has to be different. Cfg4Py has perfect solution supporting for this: adaptive deployment environment support.
 
 Adaptive Deployment Environment Support
 ---------------------------------------
-In any serious projects, your application may run at both development, testing and production site. Except for effort of copying similiar settings here and there, sometimes we'll mess up with development environment and production site. Once this happen, it could result in very serious consequence.
+In any serious projects, your application may run at both development, testing and production site. Except for effort of copying similar settings here and there, sometimes we'll mess up with development environment and production site. Once this happen, it could result in very serious consequence.
 
 To solve this, Cfg4Py developed a mechanism, that you provide different sets for configurations: dev for development machine, test for testing environment and production for production site, and all common settings are put into a file called 'defaults'.
 
@@ -58,7 +59,7 @@ for that purpose, Cfg4Py provides a one-liner config for enabling logging:
 
 Apply configuration change on-the-fly
 -------------------------------------
-Cfg4Py provides mech to automatically apply configuration changes without restart your application. For local files configuration change, it may take effect immediately. For remote config change, it take effect up to `refresh_interval` settings.
+Cfg4Py provides mechanism to automatically apply configuration changes without restart your application. For local files configuration change, it may take effect immediately. For remote config change, it take effect up to `refresh_interval` settings.
 
 Code assist (auto-complete)
 ---------------------------

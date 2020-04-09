@@ -5,6 +5,7 @@ include LICENSE
 include README.rst
 
 recursive-include cfg4py/resources *
+recursive-include docs/static *
 exclude cfg4py/resources/cfg4py_auto_gen.py
 recursive-include tests *
 recursive-exclude * __pycache__
