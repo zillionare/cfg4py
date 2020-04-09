@@ -161,7 +161,7 @@ def help():
             print("The index number must be from 0 to 2!")
 
 
-#if __name__ == "__main__":
+# if __name__ == "__main__":
 def main():
     fire.Fire({
         "help":     help,
