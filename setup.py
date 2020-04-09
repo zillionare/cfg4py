@@ -14,12 +14,12 @@ requirements = [
     "watchdog>=0.9.0",
     "apscheduler>=3.6.3",
     "fire>=0.2.1",
-    ""
+    "ruamel.yaml>=0.15.0"
 ]
 
-setup_requirements = [ ]
+setup_requirements = []
 
-test_requirements = [ ]
+test_requirements = []
 
 setup(
     author="Aaron Yang",
@@ -48,7 +48,7 @@ setup(
     url='https://github.com/jieyu_tech/cfg4py',
     version='0.1.1',
     zip_safe=False,
-    entry_points = {
+    entry_points={
         'console_scripts': ['cfg4py=cfg4py.command_line:main']
     }
 )

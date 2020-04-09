@@ -1,5 +1,5 @@
 """Top-level package for Cfg4Py."""
-from cfg4py.cfg4py import (
+from cfg4py.core import (
     RemoteConfigFetcher, enable_logging, config_remote_fetcher, create_config,
     update_config, RedisConfigFetcher, config_server)
 

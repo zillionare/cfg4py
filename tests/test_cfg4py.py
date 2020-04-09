@@ -5,7 +5,8 @@
 import unittest
 import os
 
-from cfg4py import cfg4py
+import cfg4py
+from cfg4py import core
 import logging
 
 logger = logging.getLogger(__name__)
@@ -62,7 +63,7 @@ class TestCfg4Py(unittest.TestCase):
 
         cfg4py.update_config(conf)
         save_to = "/tmp/"
-        cfg4py.build(os.path.join(save_to, "cfg4py_auto_gen.py"))
+        core.build(os.path.join(save_to, "cfg4py_auto_gen.py"))
         try:
             import sys
             sys.path.insert(0, save_to)
@@ -75,20 +76,23 @@ class TestCfg4Py(unittest.TestCase):
 
     def test_002_create_config(self):
         import os
-        # from cfg4py.resources.config import Config
+        from cfg4py.resources.cfg4py_auto_gen import Config
         os.environ['__cfg4py_server_role__'] = 'DEV'
-        cfg = cfg4py.create_config(self.resource_path)
+        cfg: Config = cfg4py.create_config(self.resource_path)
         print("cfg.services.redis.host is", cfg.services.redis.host)
 
     def test_003_config_remote_fetcher(self):
         from cfg4py import RedisConfigFetcher
         from redis import StrictRedis
         import json
-        r = StrictRedis('localhost')
+        r = StrictRedis('localhost',)
         r.set("my_app_config", json.dumps({
             "services": {
                 "redis": {
-                    "host": "127.0.0.1"
+                    "host": "192.168.3.1",
+                },
+                "redis2": {
+                    "host": "192.168.3.2"
                 }
             }
         }))
@@ -98,6 +102,9 @@ class TestCfg4Py(unittest.TestCase):
         logger.info("configuring a remote fetcher")
         cfg4py.config_remote_fetcher(fetcher, 1)
         import time
-        time.sleep(2)
+        time.sleep(1.5)
         logger.info("please check log output to see if update_config is called at least 1 once")
+        # the one from dev.yaml
         self.assertEqual(cfg.services.redis.host, '127.0.0.1')
+        # the one from redis
+        self.assertEqual(cfg.services.redis2.host, '192.168.3.2')

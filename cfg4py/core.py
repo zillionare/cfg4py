@@ -9,7 +9,6 @@ from typing import Optional
 from apscheduler.schedulers.background import BackgroundScheduler
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
 from watchdog.observers import Observer
-
 from cfg4py.config import Config
 
 logger = logging.getLogger(__name__)
@@ -28,6 +27,10 @@ _dump_on_change: bool = False
 _local_observer = None
 _cfg_obj = Config()
 
+_cfg_default = {}
+_cfg_local = {}
+_cfg_remote = {}
+
 _local_config_dir: str = ''
 
 
@@ -39,9 +42,17 @@ class RedisConfigFetcher(RemoteConfigFetcher):
         self.client = StrictRedis(host, port=port, db=db, **kwargs)
 
     def fetch(self) -> dict:
-        logger.info("fetching configuration from redis server")
-        settings = self.client.get(self.key)
-        return json.loads(settings, encoding='utf-8')
+        settings = None
+        try:
+            logger.info("fetching configuration from redis server")
+            settings = self.client.get(self.key)
+            return json.loads(settings, encoding='utf-8')
+        except json.JSONDecodeError:
+            logger.warning("failed to decode settings:\n%s", settings)
+        except Exception as e:
+            logger.exception(e)
+
+        return {}
 
 
 class LocalConfigChangeHandler(FileSystemEventHandler):
@@ -51,12 +62,15 @@ class LocalConfigChangeHandler(FileSystemEventHandler):
 
 
 def _mixin(d, u):
+    # noinspection SpellCheckingInspection
     """
-    if  value x in "keyx:valuex" pair is list, it's will be replaced
-    :param d:
-    :param u:
-    :return:
-    """
+        if  value x in "keyx:valuex" pair is list, it's will be replaced
+        :param d:
+        :param u:
+        :return:
+        """
+    u = u or {}
+    d = d or {}
     for k, v in u.items():
         if isinstance(v, Mapping):
             d[k] = _mixin(d.get(k, {}), v)
@@ -77,8 +91,10 @@ def _to_obj(obj, conf: dict):
 
 
 def _refresh():
-    conf = _remote_fetcher.fetch()
-    update_config(conf)
+    global _cfg_local, _cfg_remote
+    _cfg_remote = _remote_fetcher.fetch()
+    merged = _mixin(_cfg_remote, _cfg_local)
+    update_config(merged)
 
 
 def enable_logging(level=logging.INFO, log_file=None, file_size=10, file_count=7):
@@ -142,6 +158,12 @@ def build(save_to: str):
         lines = origin.readlines()
         lines.append("\n")
 
+    no_instance = [
+        f"{' ' * 4}def __init__(self):\n",
+        f"{' ' * 8}raise TypeError('Do NOT instantiate this class')\n",
+        "\n"
+    ]
+    lines.extend(no_instance)
     with open(save_to, encoding='utf-8', mode="w") as f:
         lines = _schema_from_obj_(_cfg_obj, lines)
         f.writelines("".join(lines))
@@ -166,7 +188,10 @@ def _schema_from_obj_(obj, lines, depth: int = 0):
             else:
                 _type = f"{type(child)}"
                 _type = re.sub(r".*\'(.*)\'>", r"\1", _type)
-                lines.append(f"{' ' * 4 * depth}{name}: Optional[{_type}] = None\n")
+                if _type != 'NoneType':
+                    lines.append(f"{' ' * 4 * depth}{name}: Optional[{_type}] = None\n")
+                else:
+                    lines.append(f"{' ' * 4 * depth}{name} = None\n")
     else:
         print(obj)
 
@@ -183,7 +208,7 @@ def create_config(local_cfg_path: str = None, dump_on_change=True):
     Returns:
 
     """
-    global _local_config_dir, _dump_on_change, _remote_fetcher, _local_observer, _cfg_obj
+    global _local_config_dir, _dump_on_change, _remote_fetcher, _local_observer, _cfg_obj, _cfg_local, _cfg_remote
 
     _dump_on_change = dump_on_change
     if local_cfg_path:
@@ -194,8 +219,8 @@ def create_config(local_cfg_path: str = None, dump_on_change=True):
         _local_observer.schedule(LocalConfigChangeHandler(), _local_config_dir, recursive=False)
         _local_observer.start()
 
-        conf = _load_from_local_file()
-        update_config(conf)
+        _cfg_local = _load_from_local_file()
+        update_config(_mixin(_cfg_remote, _cfg_local))
 
         # todo: will this overwrite existing file occasionally?
         save_to = os.path.join(_local_config_dir, "cfg4py_auto_gen.py")
@@ -266,10 +291,10 @@ def _load_from_local_file() -> dict:
     Todo: add other known file format support with third-party parsers
     """
     conf = {}
+    loader, ext = _guess_loader()
+
     role = os.getenv('__cfg4py_server_role__', '')
     logger.info("server role is %s", role)
-
-    loader, ext = _guess_loader()
     if role == '':
         msg = "You must config environment variables __cfg4py_server_role__ as one of 'DEV, TEST, PRODUCTION'"
         raise EnvironmentError(msg)
