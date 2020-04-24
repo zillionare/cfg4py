@@ -4,7 +4,6 @@ import logging.config
 import os
 import re
 from collections import Mapping
-from typing import Optional
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from watchdog.events import FileSystemEventHandler, FileModifiedEvent
@@ -13,14 +12,9 @@ from cfg4py.config import Config
 
 logger = logging.getLogger(__name__)
 
-
-class RemoteConfigFetcher:
-    def fetch(self) -> dict:
-        raise NotImplementedError("sub class must implement this!")
-
-
+envar = '__cfg4py_server_role__'
 _scheduler = BackgroundScheduler()
-_remote_fetcher: Optional[RemoteConfigFetcher] = None
+_remote_fetcher = None
 _dump_on_change: bool = False
 
 # handle local configuration file change
@@ -32,6 +26,11 @@ _cfg_local = {}
 _cfg_remote = {}
 
 _local_config_dir: str = ''
+
+
+class RemoteConfigFetcher:
+    def fetch(self) -> dict:
+        raise NotImplementedError("sub class must implement this!")
 
 
 class RedisConfigFetcher(RemoteConfigFetcher):
@@ -46,7 +45,7 @@ class RedisConfigFetcher(RemoteConfigFetcher):
         try:
             logger.info("fetching configuration from redis server")
             settings = self.client.get(self.key)
-            return json.loads(settings, encoding='utf-8')
+            return json.loads(settings)
         except json.JSONDecodeError:
             logger.warning("failed to decode settings:\n%s", settings)
         except Exception as e:
@@ -85,7 +84,6 @@ def _to_obj(obj, conf: dict):
             _obj = Config()
             setattr(obj, key, _obj)
             _to_obj(_obj, value)
-            pass
         else:
             setattr(obj, key, value)
 
@@ -161,7 +159,6 @@ def build(save_to: str):
     no_instance = [
         f"{' ' * 4}def __init__(self):\n",
         f"{' ' * 8}raise TypeError('Do NOT instantiate this class')\n",
-        "\n"
     ]
     lines.extend(no_instance)
     with open(save_to, encoding='utf-8', mode="w") as f:
@@ -183,6 +180,7 @@ def _schema_from_obj_(obj, lines, depth: int = 0):
                 continue
 
             if isinstance(child, Config):
+                lines.append('\n')
                 lines.append(f"{' ' * 4 * depth}class {name}:\n")
                 _schema_from_obj_(child, lines, depth)
             else:
@@ -198,7 +196,7 @@ def _schema_from_obj_(obj, lines, depth: int = 0):
     return lines
 
 
-def create_config(local_cfg_path: str = None, dump_on_change=True):
+def init(local_cfg_path: str = None, dump_on_change=True):
     """
     create cfg object.
     Args:
@@ -225,7 +223,6 @@ def create_config(local_cfg_path: str = None, dump_on_change=True):
         # todo: will this overwrite existing file occasionally?
         save_to = os.path.join(_local_config_dir, "cfg4py_auto_gen.py")
         build(save_to)
-
     return _cfg_obj
 
 
@@ -241,7 +238,6 @@ def update_config(conf: dict):
         logger.info("configuration is\n%s", json.dumps(conf, indent=4, ensure_ascii=False))
 
     _to_obj(_cfg_obj, conf)
-
     return _cfg_obj
 
 
@@ -275,8 +271,9 @@ def _guess_loader():
 
     if ext in [".yml", ".yaml"]:
         # noinspection PyPackageRequirements
-        import yaml
-        return yaml.safe_load, ext
+        from ruamel.yaml import YAML
+        yaml = YAML(typ='safe')
+        return yaml.load, ext
     if ext in [".json"]:
         return json.load, ext
 
@@ -293,10 +290,10 @@ def _load_from_local_file() -> dict:
     conf = {}
     loader, ext = _guess_loader()
 
-    role = os.getenv('__cfg4py_server_role__', '')
+    role = os.getenv(envar, '')
     logger.info("server role is %s", role)
     if role == '':
-        msg = "You must config environment variables __cfg4py_server_role__ as one of 'DEV, TEST, PRODUCTION'"
+        msg = f"You must config environment variables {envar} as one of 'DEV, TEST, PRODUCTION'"
         raise EnvironmentError(msg)
     try:
         with open(os.path.join(_local_config_dir, f"defaults{ext}"), "r", encoding='utf-8') as base:

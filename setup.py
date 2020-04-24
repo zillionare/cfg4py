@@ -14,7 +14,7 @@ requirements = [
     "watchdog>=0.9.0",
     "apscheduler>=3.6.3",
     "fire>=0.2.1",
-    "ruamel.yaml>=0.15.0"
+    "ruamel.yaml==0.16.0"
 ]
 
 setup_requirements = []

@@ -3,9 +3,8 @@ import os
 import sys
 
 import fire
-import yaml
-
-from cfg4py import create_config, enable_logging
+from ruamel.yaml import YAML
+from cfg4py import init, enable_logging
 
 enable_logging()
 
@@ -44,7 +43,7 @@ def build(config_dir: str):
         # set server role temporarily
         os.environ["__cfg4py_server_role__"] = "DEV"
 
-        create_config(config_dir)
+        init(config_dir)
         sys.path.insert(0, config_dir)
         # noinspection PyUnresolvedReferences
         from cfg4py_auto_gen import Config
@@ -81,8 +80,9 @@ def scaffold(dst: str):
     while dst is None:
         dst = choose_dest_dir(dst)
 
+    yaml = YAML(typ='safe')  # default, if not specfied, is 'rt' (round-trip)
     with open(os.path.join(resource_path, 'template.yaml'), 'r') as f:
-        templates = yaml.safe_load(f)
+        templates = yaml.load(f)
 
     print("Which flavors do you want?")
     print("-" * 20)
