@@ -97,3 +97,33 @@ mongodb:
       connect: True       # if True, connect immediately
       maxPoolSize: 100
       minPoolSize: 0
+pip:
+  - tsinghua: pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+  - aliyun: pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+  - tencent: pip config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple
+  - douban: pip config set global.index-url http://pypi.douban.com/simple/
+pip_usage: "add the following to ~/.config/pip/pip/conf:\n
+            [global]\n
+            index-url = https://mirrors.aliyun.com/pypi/simple/\n
+
+            or execute command:\n"
+conda:
+  - tsinghua: # 清华
+      channels:
+        - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+        - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+        - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/conda-forge/
+        - https://mirrors.tuna.tsinghua.edu.cn/anaconda/cloud/pytorch/
+      ssl_verify: true
+  - ustc: #中科大
+      channels:
+        - https://mirrors.ustc.edu.cn/anaconda/pkgs/main/
+        - https://mirrors.ustc.edu.cn/anaconda/pkgs/free/
+        - https://mirrors.ustc.edu.cn/anaconda/cloud/conda-forge/
+      ssl_verify: true
+
+conda_usage: "execute command:\n
+              conda config --add channels %url\n
+              or edit your ~/.condarc to add the following:\n"
+
+

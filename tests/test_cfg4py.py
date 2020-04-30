@@ -9,6 +9,8 @@ import cfg4py
 from cfg4py import core
 import logging
 
+from command_line import Command
+
 logger = logging.getLogger(__name__)
 
 
@@ -103,3 +105,11 @@ class TestCfg4Py(unittest.TestCase):
         self.assertEqual(cfg.services.redis.host, '127.0.0.1')
         # the one from redis
         self.assertEqual(cfg.services.redis2.host, '192.168.3.2')
+
+    def test_004_command_hint(self):
+        cmd = Command()
+        logger.info("please check the output")
+        cmd.hint('pip')
+        cmd.hint('pip', True)
+        cmd.hint('postgres/psycopg2')
+        cmd.hint('pip/tshinghua')
