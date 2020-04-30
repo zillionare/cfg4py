@@ -105,6 +105,8 @@ pip:
 pip_usage: "add the following to ~/.config/pip/pip/conf:\n
             [global]\n
             index-url = https://mirrors.aliyun.com/pypi/simple/\n
+            [install]\n
+            trusted-host=mirrors.aliyun.com
 
             or execute command:\n"
 conda:
@@ -125,5 +127,6 @@ conda:
 conda_usage: "execute command:\n
               conda config --add channels %url\n
               or edit your ~/.condarc to add the following:\n"
+
 
 

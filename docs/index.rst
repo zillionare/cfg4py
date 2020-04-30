@@ -12,6 +12,7 @@ Welcome to Cfg4Py's documentation!
    contributing
    authors
    history
+   faq
 
 Indices and tables
 ==================

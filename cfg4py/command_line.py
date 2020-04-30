@@ -1,16 +1,3 @@
-"""
-    Welcome to Cfg4Py!
-
-   support commands:
-       scaffold - generate basic settings, like logging, database access, etc.
-       build    - convert configuration into python code, for typing hinting.
-       hint     - A cheat sheet for connection string and other frequent used configurations
-       help     - show this message
-
-    Yours Sincerely
-    ---------------
-    Aaron, code@jieyu.ai
-"""
 import logging
 import os
 import sys
@@ -18,12 +5,13 @@ import sys
 import fire
 from ruamel.yaml import YAML
 
-from cfg4py import init, enable_logging
+from cfg4py import init, enable_logging, envar
 
 enable_logging()
 
 
 class Command:
+
     def __init__(self):
         self.resource_path = os.path.normpath(os.path.join(os.path.dirname(__file__), 'resources/'))
         self.yaml = YAML(typ='safe')  # default, if not specfied, is 'rt' (round-trip)
@@ -188,44 +176,44 @@ class Command:
         return transformed
 
     def hint(self, what: str = None, usage: bool = False):
-        """
-        show a cheat sheet for configurations.
+        """show a cheat sheet for configurations.
         for example:
             cfg4py hint mysql
         this will print how to configure PyMySQL
-        Args:
-            what:
-            usage:
-        Returns:
-
+        :param what
+        :param usage
         """
 
-        if what is None or ((what not in self.templates ) and what not in self.transformed):
+        if what is None or ((what not in self.templates) and what not in self.transformed):
             return self._show_supported_config()
 
         usage_key = f"{what}_usage"
 
-        if usage_key in self.templates:
-            print("Usage:" , self.templates.get(usage_key))
+        if usage_key in self.templates and usage:
+            print("Usage:", self.templates.get(usage_key))
+
         if what in self.templates:
             self.yaml.dump(self.templates[what], sys.stdout)
 
-        if usage_key in self.transformed:
+        if usage_key in self.transformed and usage:
             print("Usage:", self.transformed.get(usage_key))
+
         if what in self.transformed:
             self.yaml.dump(self.transformed[what], sys.stdout)
 
-    def help(self):
-        print(__doc__)
+    def set_server_role(self):
+        print("please add the following line into your .bashrc:\n")
+        print(f"export {envar}=DEV\n")
+        print("You need to change DEV to TEST | PRODUCTION according to its actual role accordingly")
 
 
 def main():
     cmd = Command()
     fire.Fire({
-        # "help":     help,
-        "build":    cmd.build,
-        "scaffold": cmd.scaffold,
-        "hint":     cmd.hint
+        "build":           cmd.build,
+        "scaffold":        cmd.scaffold,
+        "hint":            cmd.hint,
+        "set_server_role": cmd.set_server_role
     })
 
 

@@ -204,7 +204,6 @@ def init(local_cfg_path: str = None, dump_on_change=True):
         dump_on_change: if configuration is updated, whether or not to dump them into log file
 
     Returns:
-
     """
     global _local_config_dir, _dump_on_change, _remote_fetcher, _local_observer, _cfg_obj, _cfg_local, _cfg_remote
 

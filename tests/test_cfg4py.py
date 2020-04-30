@@ -9,7 +9,7 @@ import cfg4py
 from cfg4py import core
 import logging
 
-from command_line import Command
+from cfg4py.command_line import Command
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +20,7 @@ class TestCfg4Py(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures, if any."""
         cfg4py.enable_logging()
-        os.environ['__cfg4py_server_role__'] = 'DEV'
+        os.environ['__cfg4py_server_role__'] = 'TEST'
         self.resource_path = os.path.join(os.path.dirname(__file__), "../cfg4py/resources/")
         self.resource_path = os.path.normpath(self.resource_path)
 
@@ -82,7 +82,7 @@ class TestCfg4Py(unittest.TestCase):
         from cfg4py import RedisConfigFetcher
         from redis import StrictRedis
         import json
-        r = StrictRedis('localhost',)
+        r = StrictRedis('localhost', port=6380)
         r.set("my_app_config", json.dumps({
             "services": {
                 "redis": {
@@ -95,7 +95,7 @@ class TestCfg4Py(unittest.TestCase):
         }))
 
         cfg = cfg4py.init(self.resource_path)
-        fetcher = RedisConfigFetcher(key="my_app_config")
+        fetcher = RedisConfigFetcher(key="my_app_config", port=6380)
         logger.info("configuring a remote fetcher")
         cfg4py.config_remote_fetcher(fetcher, 1)
         import time
