@@ -4,6 +4,7 @@ import sys
 
 import fire
 from ruamel.yaml import YAML
+from typing import Optional
 
 from cfg4py import init, enable_logging, envar
 
@@ -57,7 +58,7 @@ class Command:
             # noinspection PyUnresolvedReferences
             from cfg4py_auto_gen import Config
             print(f"Config file is built with success and saved at {os.path.join(config_dir, 'cfg4py_auto_gen')}")
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             logging.exception(e)
             print("Config file built failure.")
 
@@ -81,7 +82,7 @@ class Command:
             else:
                 return None
 
-    def scaffold(self, dst: str):
+    def scaffold(self, dst: Optional[str]):
         """
         Creates initial configuration files based on our choices.
         Args:
@@ -127,11 +128,11 @@ class Command:
                 flavors["logging"] = templates["logging"]
                 continue
 
-            major = mapping[index[0]]
             try:
+                major = mapping[index[0]]
                 minor = int(index[1])
                 flavors[major] = list(templates[major][minor].values())[0]
-            except (ValueError, IndexError):
+            except (ValueError, KeyError):
                 print(f"Wrong index {index}, skipped.")
                 continue
 
@@ -206,10 +207,9 @@ class Command:
         print(f"export {envar}=DEV\n")
         print("You need to change DEV to TEST | PRODUCTION according to its actual role accordingly")
 
-
 def main():
-    cmd = Command()
-    fire.Fire({
+    cmd = Command() # pragma: no cover
+    fire.Fire({ # pragma: no cover
         "build":           cmd.build,
         "scaffold":        cmd.scaffold,
         "hint":            cmd.hint,

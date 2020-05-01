@@ -30,7 +30,7 @@ _local_config_dir: str = ''
 
 class RemoteConfigFetcher:
     def fetch(self) -> dict:
-        raise NotImplementedError("sub class must implement this!")
+        raise NotImplementedError("sub class must implement this!") # pragma: no cover
 
 
 class RedisConfigFetcher(RemoteConfigFetcher):
@@ -46,9 +46,9 @@ class RedisConfigFetcher(RemoteConfigFetcher):
             logger.info("fetching configuration from redis server")
             settings = self.client.get(self.key)
             return json.loads(settings)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError: # pragma: no cover
             logger.warning("failed to decode settings:\n%s", settings)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             logger.exception(e)
 
         return {}
