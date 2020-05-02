@@ -28,7 +28,7 @@ deploy:
     python: 3.8
 
 before_install:
-  - pip install --user codecov
+  - pip install codecov
 after_success:
   - codecov --file coverage/lcov.info --disable search
 
