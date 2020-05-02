@@ -11,7 +11,9 @@ Overview
         :target: https://cfg4py.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-.. image:: https://codecov.io/gh/zillionare/cfg4py/branch/master/graphs/badge.svg
+.. image:: https://codecov.io/gh/zillionare/cfg4py/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/zillionare/cfg4py
+
 
 * Free software: BSD license
 * Documentation: https://cfg4py.readthedocs.io.

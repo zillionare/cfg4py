@@ -24,13 +24,13 @@ deploy:
     secure: PLEASE_REPLACE_ME
   on:
     tags: true
-    repo: jieyu_tech/cfg4py
+    repo: zillionare/cfg4py
     python: 3.8
 
-before_install:
-  - pip install codecov
-after_success:
-  - codecov --file coverage/lcov.info --disable search
+#before_install:
+#  - pip install codecov
+#after_success:
+#  - codecov
 
 services:
   - redis-server
