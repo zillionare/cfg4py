@@ -92,7 +92,7 @@ class TestCfg4Py(unittest.TestCase):
         from cfg4py import RedisConfigFetcher
         from redis import StrictRedis
         import json
-        r = StrictRedis('localhost', port=6380)
+        r = StrictRedis('localhost')
         r.set("my_app_config", json.dumps({
             "services": {
                 "redis":  {
@@ -105,7 +105,7 @@ class TestCfg4Py(unittest.TestCase):
         }))
 
         cfg = cfg4py.init(self.resource_path)
-        fetcher = RedisConfigFetcher(key="my_app_config", port=6380)
+        fetcher = RedisConfigFetcher(key="my_app_config")
         logger.info("configuring a remote fetcher")
         cfg4py.config_remote_fetcher(fetcher, 1)
         import time

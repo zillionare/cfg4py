@@ -4,13 +4,14 @@ Overview
 .. image:: https://img.shields.io/pypi/v/cfg4py.svg
         :target: https://pypi.python.org/pypi/cfg4py
 
-.. image:: https://img.shields.io/travis/jieyu_tech/cfg4py.svg
-        :target: https://travis-ci.com/jieyu_tech/cfg4py
+.. image:: https://travis-ci.org/zillionare/cfg4py.svg?branch=master
+        :target: https://travis-ci.com/zillionare/cfg4py
 
 .. image:: https://readthedocs.org/projects/cfg4py/badge/?version=latest
         :target: https://cfg4py.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. image:: https://codecov.io/gh/zillionare/cfg4py/branch/master/graphs/badge.svg
 
 * Free software: BSD license
 * Documentation: https://cfg4py.readthedocs.io.

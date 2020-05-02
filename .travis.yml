@@ -27,5 +27,10 @@ deploy:
     repo: jieyu_tech/cfg4py
     python: 3.8
 
+before_install:
+  - pip install --user codecov
+after_success:
+  - codecov --file coverage/lcov.info --disable search
+
 services:
-  - redis
+  - redis-server
