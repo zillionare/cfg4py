@@ -1,5 +1,6 @@
 # .coveragerc to control coverage.py
 [run]
+include=cfg4py
 omit =
     */cfg4py_auto_gen.py
     */config.py
