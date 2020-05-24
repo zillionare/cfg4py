@@ -309,13 +309,12 @@ def _load_from_local_file() -> dict:
                 _mixin(conf, _test)
 
         else:
-            try:
-                with open(os.path.join(_local_config_dir, f"dev{ext}"), "r", encoding='utf-8') as dev:
-                    _dev = loader(dev)
-                    _mixin(conf, _dev)
-            except FileNotFoundError:
-                pass
-
+            with open(os.path.join(_local_config_dir, f"dev{ext}"), "r", encoding='utf-8') as dev:
+                _dev = loader(dev)
+                _mixin(conf, _dev)
+    except FileNotFoundError as e:
+        if e.filename.find('defaults') != -1:
+            raise FileNotFoundError("Failed to find default configuration file")
     except Exception as e:
         logger.exception(e)
 
