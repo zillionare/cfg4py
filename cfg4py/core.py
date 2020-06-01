@@ -276,6 +276,8 @@ def _guess_loader():
     if ext in [".json"]:
         return json.load, ext
 
+def get_config_dir():
+    return _local_config_dir
 
 def _load_from_local_file() -> dict:
     """
@@ -322,5 +324,5 @@ def _load_from_local_file() -> dict:
 
 
 # noinspection PyUnusedLocal
-def config_server(role: str):
-    print("Not implemented yet.")
+def config_server_role(role: str):
+    os.environ[envar] = role
