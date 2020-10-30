@@ -2,7 +2,7 @@
 
 """The setup script."""
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -34,7 +34,8 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    description="A python config module support hierarchical configuration and multi-environment deployment",
+    description="A python config module support hierarchical configuration and "
+    "multi-environment deployment",
     install_requires=requirements,
     license="BSD license",
     long_description=readme + '\n\n' + history,
@@ -46,7 +47,7 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/jieyu_tech/cfg4py',
-    version='0.6.1',
+    version='0.7.0',
     zip_safe=False,
     entry_points={
         'console_scripts': ['cfg4py=cfg4py.command_line:main']
