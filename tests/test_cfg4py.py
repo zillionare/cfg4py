@@ -1,16 +1,16 @@
 #!/usr/bin/env python
-
 """Tests for `cfg4py` package."""
-import shutil
-import unittest
+import logging
 import os
+import shutil
+import sys
 import tempfile
+import time
+import unittest
+import unittest.mock
 
 import cfg4py
 from cfg4py import core
-import logging
-from unittest.mock import patch
-
 from cfg4py.command_line import Command
 
 logger = logging.getLogger(__name__)
@@ -28,10 +28,11 @@ class TestCfg4Py(unittest.TestCase):
         """Set up test fixtures, if any."""
         cfg4py.enable_logging()
         os.environ['__cfg4py_server_role__'] = 'TEST'
-        self.resource_path = os.path.join(os.path.dirname(__file__), "../cfg4py/resources/")
+        self.resource_path = os.path.join(os.path.dirname(__file__),
+                                          "../cfg4py/resources/")
         self.resource_path = os.path.normpath(self.resource_path)
         self.home = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
-        self.output = os.path.join(tempfile.gettempdir(), 'cfg4py')
+        self.output = os.path.join(tempfile.gettempdir(), 'cfg4py_test')
         shutil.rmtree(self.output, ignore_errors=True)
 
     def tearDown(self):
@@ -45,7 +46,7 @@ class TestCfg4Py(unittest.TestCase):
 
     def test_001_update_config(self):
         conf = {
-            "aaron":    {
+            "aaron": {
                 "surname": "yang"
             },
             "services": {
@@ -60,7 +61,7 @@ class TestCfg4Py(unittest.TestCase):
 
     def test_001_build(self):
         conf = {
-            "aaron":    {
+            "aaron": {
                 "surname": "yang"
             },
             "services": {
@@ -73,10 +74,9 @@ class TestCfg4Py(unittest.TestCase):
         cfg4py.update_config(conf)
         core.build(os.path.join(self.resource_path, "cfg4py_auto_gen.py"))
         try:
-            import sys
             sys.path.insert(0, self.resource_path)
-            # noinspection PyUnresolvedReferences
-            from cfg4py_auto_gen import Config
+            from cfg4py_auto_gen import Config  # noqa
+
             # no exception means the file has been generated successfully
             self.assertTrue(True)
         except Exception:
@@ -89,28 +89,32 @@ class TestCfg4Py(unittest.TestCase):
         print("cfg.services.redis.host is", cfg.services.redis.host)
 
     def test_003_config_remote_fetcher(self):
-        from cfg4py import RedisConfigFetcher
-        from redis import StrictRedis
         import json
+
+        from redis import StrictRedis  # type: ignore
+
+        from cfg4py import RedisConfigFetcher
         r = StrictRedis('localhost')
-        r.set("my_app_config", json.dumps({
-            "services": {
-                "redis":  {
-                    "host": "192.168.3.1",
-                },
-                "redis2": {
-                    "host": "192.168.3.2"
+        r.set(
+            "my_app_config",
+            json.dumps({
+                "services": {
+                    "redis": {
+                        "host": "192.168.3.1",
+                    },
+                    "redis2": {
+                        "host": "192.168.3.2"
+                    }
                 }
-            }
-        }))
+            }))
 
         cfg = cfg4py.init(self.resource_path)
         fetcher = RedisConfigFetcher(key="my_app_config")
         logger.info("configuring a remote fetcher")
-        cfg4py.config_remote_fetcher(fetcher, 1)
-        import time
-        time.sleep(2)
-        logger.info("please check log output to see if update_config is called at least 1 once")
+        cfg4py.config_remote_fetcher(fetcher, 0.1)
+        time.sleep(0.5)
+        logger.info(
+            "please check log output to see if update_config is called at least 1 once")
         # the one from dev.yaml
         self.assertEqual(cfg.services.redis.host, '127.0.0.1')
         # the one from redis
@@ -146,7 +150,8 @@ class TestCfg4Py(unittest.TestCase):
 
         with unittest.mock.patch('builtins.input', side_effect=answers):
             try:
-                with unittest.mock.patch('sys.exit', lambda *args: early_jump('user pressed Q')):
+                with unittest.mock.patch('sys.exit',
+                                         lambda *args: early_jump('user pressed Q')):
                     cmd.scaffold(self.output)
                 self.assertTrue(False, 'sys exit not triggered')
             except SystemExit:
@@ -188,7 +193,8 @@ class TestCfg4Py(unittest.TestCase):
         # path not exists run
         shutil.rmtree(self.output)
         try:
-            with unittest.mock.patch('sys.exit', lambda *args: early_jump('Path not exists')):
+            with unittest.mock.patch('sys.exit',
+                                     lambda *args: early_jump('Path not exists')):
                 cmd.build(self.output)
             self.assertTrue(False, 'sys.exit not triggered')
         except SystemExit:
@@ -197,17 +203,34 @@ class TestCfg4Py(unittest.TestCase):
         # no files in self.output
         os.makedirs(self.output, exist_ok=True)
         try:
-            with unittest.mock.patch('sys.exit', lambda *args: early_jump('no files in folder')):
+            with unittest.mock.patch('sys.exit',
+                                     lambda *args: early_jump('no files in folder')):
                 cmd.build(self.output)
             self.assertTrue(False, 'sys.exit not triggered')
         except SystemExit:
             self.assertTrue(True)
 
     def test_008_enable_logging(self):
-        os.makedirs(self.output, exist_ok=True)
-        cfg4py.enable_logging(log_file=os.path.join(self.output, "cfg4py.log"), file_size=1e-6, file_count=3)
+        os.makedirs(self.output, 0O777, exist_ok=True)
+        cfg4py.enable_logging(log_file=os.path.join(self.output, "cfg4py.log"),
+                              file_size=1e-6,
+                              file_count=3)
         logger.info("%s", ["test log"])
 
     def test_009_set_server_role(self):
         cmd = Command()
         cmd.set_server_role()
+
+    def test_010_read_envar(self):
+        tmpdir = tempfile.gettempdir()
+        cfg4dir = os.path.join(tmpdir, 'cfg4py_test')
+        config_file = os.path.join(cfg4dir, 'defaults.yaml')
+        os.makedirs(cfg4dir, 0o777, exist_ok=True)
+        os.environ['account'] = 'aaron'
+        content = ["account: ${account}", "\n"]
+
+        with open(config_file, 'w+') as f:
+            f.writelines("\n".join(content))
+
+        cfg = cfg4py.init(cfg4dir)
+        self.assertEqual(cfg.account, 'aaron')

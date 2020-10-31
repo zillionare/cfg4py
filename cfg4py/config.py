@@ -1,3 +1,4 @@
+# noqa
 from typing import Optional
 
 
@@ -9,7 +10,8 @@ class Config(object):
 
     def __getattribute__(self, name):
         """
-        keep tracking if the config is accessed. If there's no access, then even the refresh interval is reached, we
+        keep tracking if the config is accessed. If there's no access, then even the
+         refresh interval is reached, we
         will not call the remote fetcher.
 
         Args:

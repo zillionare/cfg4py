@@ -34,8 +34,7 @@ setup(
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
     ],
-    description="A python config module support hierarchical configuration and "
-    "multi-environment deployment",
+    description="Cascading, adaptive and auto-complete supported Python config module",
     install_requires=requirements,
     license="BSD license",
     long_description=readme + '\n\n' + history,

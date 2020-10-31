@@ -1,13 +1,17 @@
 """Main module."""
-import json
 import logging.config
 import os
 import re
-from collections import Mapping
+from collections.abc import Mapping
+from io import StringIO
 
 from apscheduler.schedulers.background import BackgroundScheduler
-from watchdog.events import FileSystemEventHandler, FileModifiedEvent
+from ruamel.yaml import YAML
+from ruamel.yaml import error as yaml_error
+from ruamel.yaml.error import YAMLError
+from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
+
 from cfg4py.config import Config
 
 logger = logging.getLogger(__name__)
@@ -16,6 +20,8 @@ envar = '__cfg4py_server_role__'
 _scheduler = BackgroundScheduler()
 _remote_fetcher = None
 _dump_on_change: bool = False
+
+yaml = YAML(typ='safe')
 
 # handle local configuration file change
 _local_observer = None
@@ -30,25 +36,31 @@ _local_config_dir: str = ''
 
 class RemoteConfigFetcher:
     def fetch(self) -> dict:
-        raise NotImplementedError("sub class must implement this!") # pragma: no cover
+        raise NotImplementedError("sub class must implement this!")  # pragma: no cover
 
 
 class RedisConfigFetcher(RemoteConfigFetcher):
-    def __init__(self, key: str, host: str = 'localhost', port: int = 6379, db: int = 0, **kwargs):
+    def __init__(self,
+                 key: str,
+                 host: str = 'localhost',
+                 port: int = 6379,
+                 db: int = 0,
+                 **kwargs):
         self.key = key
-        # noinspection PyPackageRequirements
-        from redis import StrictRedis
-        self.client = StrictRedis(host, port=port, db=db, **kwargs)
+        from redis import StrictRedis  # type: ignore
+        self.client = StrictRedis(host,
+                                  port=port,
+                                  db=db,
+                                  decode_responses='utf-8',
+                                  **kwargs)
 
     def fetch(self) -> dict:
         settings = None
         try:
             logger.info("fetching configuration from redis server")
             settings = self.client.get(self.key)
-            return json.loads(settings)
-        except json.JSONDecodeError: # pragma: no cover
-            logger.warning("failed to decode settings:\n%s", settings)
-        except Exception as e: # pragma: no cover
+            return _load_and_replace_envar(settings)
+        except Exception as e:  # pragma: no cover
             logger.exception(e)
 
         return {}
@@ -99,11 +111,12 @@ def enable_logging(level=logging.INFO, log_file=None, file_size=10, file_count=7
     """
     Enable basic log function for the application
 
-    if log_file is None, then it'll provide console logging, otherwise, the console logging is turned off, all
-    events will be logged into the provided file.
+    if log_file is None, then it'll provide console logging, otherwise, the console
+    logging is turned off, all events will be logged into the provided file.
 
     Args:
-        level: the log level, one of logging.DEBUG, logging.INFO, logging.WARNING, logging.Error
+        level: the log level, one of logging.DEBUG, logging.INFO, logging.WARNING,
+        logging.Error
         log_file: the absolute file path for the log.
         file_size: file size in MB unit
         file_count: how many backup files leaved in disk
@@ -117,7 +130,8 @@ def enable_logging(level=logging.INFO, log_file=None, file_size=10, file_count=7
 
     from logging import handlers
 
-    formatter = logging.Formatter('%(asctime)s %(levelname)-1.1s %(filename)s:%(lineno)s | %(message)s')
+    formatter = logging.Formatter(
+        '%(asctime)s %(levelname)-1.1s %(filename)s:%(lineno)s | %(message)s')
 
     _logger = logging.getLogger()
     _logger.setLevel(level)
@@ -127,7 +141,10 @@ def enable_logging(level=logging.INFO, log_file=None, file_size=10, file_count=7
         console.setFormatter(formatter)
         _logger.addHandler(console)
     else:
-        rotating_file = handlers.RotatingFileHandler(log_file, maxBytes=1024 * 1024 * file_size,
+        file_dir = os.path.dirname(log_file)
+        os.makedirs(file_dir, exist_ok=True)
+        rotating_file = handlers.RotatingFileHandler(log_file,
+                                                     maxBytes=1024 * 1024 * file_size,
                                                      backupCount=file_count)
         rotating_file.setFormatter(formatter)
         _logger.addHandler(rotating_file)
@@ -135,7 +152,8 @@ def enable_logging(level=logging.INFO, log_file=None, file_size=10, file_count=7
 
 def config_remote_fetcher(fetcher: RemoteConfigFetcher, interval: int = 300):
     """
-    config a remote configuration fetcher, which will pull the settings on every `refresh_interval`
+    config a remote configuration fetcher, which will pull the settings on every
+     `refresh_interval`
     Args:
         fetcher: sub class of `RemoteConfigFetcher`
         interval: how long should cfg4py to pull the configuration from remote
@@ -201,11 +219,13 @@ def init(local_cfg_path: str = None, dump_on_change=True):
     create cfg object.
     Args:
         local_cfg_path: the directory name where your configuration files exist
-        dump_on_change: if configuration is updated, whether or not to dump them into log file
+        dump_on_change: if configuration is updated, whether or not to dump them into
+         log file
 
     Returns:
     """
-    global _local_config_dir, _dump_on_change, _remote_fetcher, _local_observer, _cfg_obj, _cfg_local, _cfg_remote
+    global _local_config_dir, _dump_on_change, _remote_fetcher, _local_observer,\
+        _cfg_obj, _cfg_local, _cfg_remote
 
     _dump_on_change = dump_on_change
     if local_cfg_path:
@@ -213,7 +233,9 @@ def init(local_cfg_path: str = None, dump_on_change=True):
 
         # handle local configuration file change
         _local_observer = Observer()
-        _local_observer.schedule(LocalConfigChangeHandler(), _local_config_dir, recursive=False)
+        _local_observer.schedule(LocalConfigChangeHandler(),
+                                 _local_config_dir,
+                                 recursive=False)
         _local_observer.start()
 
         _cfg_local = _load_from_local_file()
@@ -225,6 +247,18 @@ def init(local_cfg_path: str = None, dump_on_change=True):
     return _cfg_obj
 
 
+def yaml_dump(conf, options=None):
+    if options is None:
+        options = {}
+    string_stream = StringIO()
+    try:
+        yaml.dump(conf, string_stream, **options)
+        output_str = string_stream.getvalue()
+    finally:
+        string_stream.close()
+    return output_str
+
+
 def update_config(conf: dict):
     global _cfg_obj
 
@@ -234,7 +268,7 @@ def update_config(conf: dict):
         del conf['logging']
 
     if _dump_on_change:
-        logger.info("configuration is\n%s", json.dumps(conf, indent=4, ensure_ascii=False))
+        logger.info("configuration is\n%s", yaml_dump(conf))
 
     _to_obj(_cfg_obj, conf)
     return _cfg_obj
@@ -244,21 +278,15 @@ def _process_logging_settings(conf: dict):
     logging.config.dictConfig(conf)
 
 
-def _guess_loader():
+def _guess_extension():
     files = os.listdir(_local_config_dir)
-    counter = {
-        ".yml":  0,
-        ".yaml": 0,
-        ".json": 0
-    }
+    counter = {".yml": 0, ".yaml": 0}
 
     for f in files:
         _, ext = os.path.splitext(f)
         if ext == '.yml':
             counter[ext] += 1
         elif ext == '.yaml':
-            counter[ext] += 1
-        elif ext == ".json":
             counter[ext] += 1
 
     _max = 0
@@ -270,14 +298,41 @@ def _guess_loader():
 
     if ext in [".yml", ".yaml"]:
         # noinspection PyPackageRequirements
-        from ruamel.yaml import YAML
-        yaml = YAML(typ='safe')
-        return yaml.load, ext
-    if ext in [".json"]:
-        return json.load, ext
+        return ext
+    else:
+        msg = "No config files present, or file format is not yaml."
+        raise FileNotFoundError(msg)
+
 
 def get_config_dir():
     return _local_config_dir
+
+
+def _load_and_replace_envar(content: str):
+    """parse content, replace placeholder with environment variables, and load with yaml
+
+    Args:
+        content (str): the content of configurations
+    """
+    pattern = re.compile(r'.*?\${(\w+)}.*?')
+    match = pattern.findall(content)
+    if match:
+        replaced = content
+        for g in match:
+            replaced = replaced.replace(f'${{{g}}}',
+                                        os.environ.get(g, f'ERROR_ENVAR_NOT_SET[{g}]'))
+        try:
+            return yaml.load(replaced)
+        except YAMLError as e:
+            logger.error("failed to parse:%s\n", content)
+            raise e
+
+    try:
+        return yaml.load(content)
+    except YAMLError as e:
+        logger.error("failed to parse：%s\n", content)
+        raise e
+
 
 def _load_from_local_file() -> dict:
     """
@@ -289,30 +344,39 @@ def _load_from_local_file() -> dict:
     Todo: add other known file format support with third-party parsers
     """
     conf = {}
-    loader, ext = _guess_loader()
 
     role = os.getenv(envar, '')
     logger.info("server role is %s", role)
     if role == '':
-        msg = f"You must config environment variables {envar} as one of 'DEV, TEST, PRODUCTION'"
+        msg = f"You must config environment variables {envar} as one of"
+        "'DEV, TEST, PRODUCTION'"
         raise EnvironmentError(msg)
     try:
-        with open(os.path.join(_local_config_dir, f"defaults{ext}"), "r", encoding='utf-8') as base:
-            conf = loader(base)
+        ext = _guess_extension()
+        with open(os.path.join(_local_config_dir, f"defaults{ext}"),
+                  "r",
+                  encoding='utf-8') as base:
+            conf = _load_and_replace_envar(base.read(-1))
 
         if role == 'PRODUCTION':
-            with open(os.path.join(_local_config_dir, f"production{ext}"), "r", encoding='utf-8') as prod:
-                _prod = loader(prod)
+            with open(os.path.join(_local_config_dir, f"production{ext}"),
+                      "r",
+                      encoding='utf-8') as prod:
+                _prod = _load_and_replace_envar(prod.read(-1))
                 _mixin(conf, _prod)
 
         elif role == 'TEST':
-            with open(os.path.join(_local_config_dir, f"test{ext}"), "r", encoding='utf-8') as test:
-                _test = loader(test)
+            with open(os.path.join(_local_config_dir, f"test{ext}"),
+                      "r",
+                      encoding='utf-8') as test:
+                _test = _load_and_replace_envar(test.read(-1))
                 _mixin(conf, _test)
 
         else:
-            with open(os.path.join(_local_config_dir, f"dev{ext}"), "r", encoding='utf-8') as dev:
-                _dev = loader(dev)
+            with open(os.path.join(_local_config_dir, f"dev{ext}"),
+                      "r",
+                      encoding='utf-8') as dev:
+                _dev = _load_and_replace_envar(dev.read(-1))
                 _mixin(conf, _dev)
     except FileNotFoundError as e:
         if e.filename.find('defaults') != -1:
