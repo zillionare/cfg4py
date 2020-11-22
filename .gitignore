@@ -104,4 +104,4 @@ ENV/
 # IDE settings
 .vscode/
 /.idea/
-/cfg4py/resources/cfg4py_auto_gen.py
+/cfg4py/resources/schema.py

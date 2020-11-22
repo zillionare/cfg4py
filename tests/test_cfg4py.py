@@ -72,10 +72,10 @@ class TestCfg4Py(unittest.TestCase):
         }
 
         cfg4py.update_config(conf)
-        core.build(os.path.join(self.resource_path, "cfg4py_auto_gen.py"))
+        core.build(os.path.join(self.resource_path, "schema.py"))
         try:
             sys.path.insert(0, self.resource_path)
-            from cfg4py_auto_gen import Config  # noqa
+            from schema import Config  # noqa
 
             # no exception means the file has been generated successfully
             self.assertTrue(True)
@@ -83,7 +83,7 @@ class TestCfg4Py(unittest.TestCase):
             self.assertTrue(False)
 
     def test_002_create_config(self):
-        from cfg4py.resources.cfg4py_auto_gen import Config
+        from cfg4py.resources.schema import Config
         os.environ['__cfg4py_server_role__'] = 'DEV'
         cfg: Config = cfg4py.init(self.resource_path)
         print("cfg.services.redis.host is", cfg.services.redis.host)

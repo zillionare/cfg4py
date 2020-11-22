@@ -6,7 +6,7 @@ include README.rst
 
 recursive-include cfg4py/resources *
 recursive-include docs/static *
-exclude cfg4py/resources/cfg4py_auto_gen.py
+exclude cfg4py/resources/schema.py
 recursive-include tests *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]

@@ -49,8 +49,8 @@ Build config class, and import it into your project:
 .. code-block::python
         from typing import TYPE_CHECKING
         if TYPE_CHECKING:
-            # make sure that cfg4py_auto_gen is at your $PYTHONPATH
-            from cfg4py_auto_gen import Config
+            # make sure that schema is at your $PYTHONPATH
+            from schema import Config
         import cfg4py
 
         cfg: Config = cfg4py.init('/path/to/your/config/dir')

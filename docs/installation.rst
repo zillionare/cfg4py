@@ -32,13 +32,13 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone git://github.com/jieyu_tech/cfg4py
+    $ git clone 
 
 Or download the `tarball`_:
 
 .. code-block:: console
 
-    $ curl -OJL https://github.com/jieyu_tech/cfg4py/tarball/master
+    $ curl -OJL https://github.com/zillionare/cfg4py/tarball/master
 
 Once you have a copy of the source, you can install it with:
 
@@ -47,5 +47,5 @@ Once you have a copy of the source, you can install it with:
     $ python setup.py install
 
 
-.. _Github repo: https://github.com/jieyu_tech/cfg4py
-.. _tarball: https://github.com/jieyu_tech/cfg4py/tarball/master
+.. _Github repo: https://github.com/zillionare/cfg4py
+.. _tarball: https://github.com/zillionare/cfg4py/tarball/master

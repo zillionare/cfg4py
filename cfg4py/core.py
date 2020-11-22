@@ -221,7 +221,8 @@ def init(local_cfg_path: str = None, dump_on_change=True):
 
     Returns:
     """
-    global _local_config_dir, _dump_on_change, _remote_fetcher, _local_observer, _cfg_obj, _cfg_local, _cfg_remote
+    global _local_config_dir, _dump_on_change, _remote_fetcher, _local_observer
+    global _cfg_obj, _cfg_local, _cfg_remote
 
     _dump_on_change = dump_on_change
     if local_cfg_path:
@@ -238,7 +239,7 @@ def init(local_cfg_path: str = None, dump_on_change=True):
         update_config(_mixin(_cfg_remote, _cfg_local))
 
         # todo: will this overwrite existing file occasionally?
-        save_to = os.path.join(_local_config_dir, "cfg4py_auto_gen.py")
+        save_to = os.path.join(_local_config_dir, "schema.py")
         build(save_to)
     return _cfg_obj
 

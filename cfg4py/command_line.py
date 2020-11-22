@@ -61,9 +61,9 @@ class Command:
 
             init(config_dir)
             sys.path.insert(0, config_dir)
-            from cfg4py_auto_gen import Config  # type: ignore # noqa
+            from schema import Config  # type: ignore # noqa
 
-            output_file = f"{os.path.join(config_dir, 'cfg4py_auto_gen')}"
+            output_file = f"{os.path.join(config_dir, 'schema')}"
             msg = f"Config file is built with success and saved at {output_file}"
             print(msg)
         except Exception as e:  # pragma: no cover

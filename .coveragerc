@@ -2,7 +2,7 @@
 [run]
 include=cfg4py
 omit =
-    */cfg4py_auto_gen.py
+    */schema.py
     */config.py
 
 [report]
