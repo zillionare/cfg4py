@@ -57,16 +57,22 @@ This is how Cfg4Py solves the problem:
 2. Change the settings on local machine, after the period you've set, these changes are popluated to all machines.
 
 Auto-complete
----------------------------
+-------------
 
-.. image:: docs/static/auto-complete.gif
+.. image:: static/auto-complete.gif
 
 With other python config module, you have to remember all the configuration keys, and refer to each settings by something like cfg["services"]["redis"]["host"] and etc. Keys are hard to rememb, prone to typo, and way too much tedious.
 
 When cfg4py load raw settigns from yaml file, it'll compile all the settings into a Python class, then Cfg4Py let you access your settings by attributes. Compares the two ways to access configure item:
 
+.. code-block::python
+
         cfg["services"]["redis"]["host"]
+
 vs:
+
+.. code-block::python
+
         cfg.services.redis.host
 
 Apparently the latter is the better.
@@ -79,13 +85,15 @@ It's hard to remember how to configure log, database, cache and etc, so cfg4py p
 
 Just run cfg4py scaffold, follow the tips then you're done.
 
-.. image:: docs/static/scaffold.png
+.. image:: static/scaffold.png
 
 Environment variables macro
 ----------------------------
 The best way to keep secret, is never share them. If you put account/password files, and these files may be leak to the public. For example, push to github by accident.
 
 With cfg4py, you can set these secret as environment variables, then use marco in config files. For example, if you have the following in defaults.yaml (any other files will do too):
+.. code-block::text
+
         postgres:
                 dsn: postgres://{postgres_account}:{postgres_password}@localhost
 

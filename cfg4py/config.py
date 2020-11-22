@@ -9,17 +9,6 @@ class Config(object):
         self.__access_counter__ = 0
 
     def __getattribute__(self, name):
-        """
-        keep tracking if the config is accessed. If there's no access, then even the
-         refresh interval is reached, we
-        will not call the remote fetcher.
-
-        Args:
-            name:
-
-        Returns:
-
-        """
         obj = object.__getattribute__(self, name)
         if name.startswith("__") and name.endswith("__"):
             return obj
