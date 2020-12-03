@@ -1,15 +1,15 @@
 """Top-level package for Cfg4Py."""
 from cfg4py.core import (
+    RedisConfigFetcher,
     RemoteConfigFetcher,
-    enable_logging,
+    _cfg_obj,
     config_remote_fetcher,
+    config_server_role,
+    enable_logging,
+    envar,
+    get_config_dir,
     init,
     update_config,
-    RedisConfigFetcher,
-    config_server_role,
-    envar,
-    _cfg_obj,
-    get_config_dir,
 )
 
 __author__ = """Aaron Yang"""

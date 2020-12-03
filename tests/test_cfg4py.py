@@ -27,12 +27,13 @@ class TestCfg4Py(unittest.TestCase):
     def setUp(self):
         """Set up test fixtures, if any."""
         cfg4py.enable_logging()
-        os.environ['__cfg4py_server_role__'] = 'TEST'
-        self.resource_path = os.path.join(os.path.dirname(__file__),
-                                          "../cfg4py/resources/")
+        os.environ["__cfg4py_server_role__"] = "TEST"
+        self.resource_path = os.path.join(
+            os.path.dirname(__file__), "../cfg4py/resources/"
+        )
         self.resource_path = os.path.normpath(self.resource_path)
-        self.home = os.path.normpath(os.path.join(os.path.dirname(__file__), '..'))
-        self.output = os.path.join(tempfile.gettempdir(), 'cfg4py_test')
+        self.home = os.path.normpath(os.path.join(os.path.dirname(__file__), ".."))
+        self.output = os.path.join(tempfile.gettempdir(), "cfg4py_test")
         shutil.rmtree(self.output, ignore_errors=True)
 
     def tearDown(self):
@@ -42,33 +43,21 @@ class TestCfg4Py(unittest.TestCase):
         """Test something."""
         logger.info("resource_path is %s", self.resource_path)
         cfg = cfg4py.init(self.resource_path)
-        self.assertEqual(cfg.services.redis.host, '127.0.0.1')
+        self.assertEqual(cfg.services.redis.host, "127.0.0.1")
 
     def test_001_update_config(self):
         conf = {
-            "aaron": {
-                "surname": "yang"
-            },
-            "services": {
-                "redis": {
-                    "host": "localhost"
-                }
-            }
+            "aaron": {"surname": "yang"},
+            "services": {"redis": {"host": "localhost"}},
         }
 
         cfg = cfg4py.update_config(conf)
-        self.assertEqual('localhost', cfg.services.redis.host)
+        self.assertEqual("localhost", cfg.services.redis.host)
 
     def test_001_build(self):
         conf = {
-            "aaron": {
-                "surname": "yang"
-            },
-            "services": {
-                "redis": {
-                    "host": "localhost"
-                }
-            }
+            "aaron": {"surname": "yang"},
+            "services": {"redis": {"host": "localhost"}},
         }
 
         cfg4py.update_config(conf)
@@ -84,7 +73,8 @@ class TestCfg4Py(unittest.TestCase):
 
     def test_002_create_config(self):
         from cfg4py.resources.schema import Config
-        os.environ['__cfg4py_server_role__'] = 'DEV'
+
+        os.environ["__cfg4py_server_role__"] = "DEV"
         cfg: Config = cfg4py.init(self.resource_path)
         print("cfg.services.redis.host is", cfg.services.redis.host)
 
@@ -94,19 +84,21 @@ class TestCfg4Py(unittest.TestCase):
         from redis import StrictRedis  # type: ignore
 
         from cfg4py import RedisConfigFetcher
-        r = StrictRedis('localhost')
+
+        r = StrictRedis("localhost")
         r.set(
             "my_app_config",
-            json.dumps({
-                "services": {
-                    "redis": {
-                        "host": "192.168.3.1",
-                    },
-                    "redis2": {
-                        "host": "192.168.3.2"
+            json.dumps(
+                {
+                    "services": {
+                        "redis": {
+                            "host": "192.168.3.1",
+                        },
+                        "redis2": {"host": "192.168.3.2"},
                     }
                 }
-            }))
+            ),
+        )
 
         cfg = cfg4py.init(self.resource_path)
         fetcher = RedisConfigFetcher(key="my_app_config")
@@ -114,20 +106,21 @@ class TestCfg4Py(unittest.TestCase):
         cfg4py.config_remote_fetcher(fetcher, 0.1)
         time.sleep(0.5)
         logger.info(
-            "please check log output to see if update_config is called at least 1 once")
+            "please check log output to see if update_config is called at least 1 once"
+        )
         # the one from dev.yaml
-        self.assertEqual(cfg.services.redis.host, '127.0.0.1')
+        self.assertEqual(cfg.services.redis.host, "127.0.0.1")
         # the one from redis
-        self.assertEqual(cfg.services.redis2.host, '192.168.3.2')
+        self.assertEqual(cfg.services.redis2.host, "192.168.3.2")
 
     def test_004_command_hint(self):
         cmd = Command()
         logger.info("please check the output")
-        cmd.hint('pip')
-        cmd.hint('pip', True)
-        cmd.hint('postgres/psycopg2')
-        cmd.hint('postgres/psycopg2', True)
-        cmd.hint('pip/tshinghua')
+        cmd.hint("pip")
+        cmd.hint("pip", True)
+        cmd.hint("postgres/psycopg2")
+        cmd.hint("postgres/psycopg2", True)
+        cmd.hint("pip/tshinghua")
 
     def test_005_sigleton(self):
         cfg1 = cfg4py.get_instance()
@@ -139,50 +132,51 @@ class TestCfg4Py(unittest.TestCase):
         cmd = Command()
 
         # folder not exists, create
-        answers = [self.output, 'Y', '11']
-        with unittest.mock.patch('builtins.input', side_effect=answers):
+        answers = [self.output, "Y", "11"]
+        with unittest.mock.patch("builtins.input", side_effect=answers):
             cmd.scaffold(None)
 
-        self.assertTrue(os.path.exists(os.path.join(self.output, 'defaults.yaml')))
+        self.assertTrue(os.path.exists(os.path.join(self.output, "defaults.yaml")))
 
         # files exists, ask for dst again, then we give non-exist path and 'Q' to quit
-        answers = ['', 'Q']
+        answers = ["", "Q"]
 
-        with unittest.mock.patch('builtins.input', side_effect=answers):
+        with unittest.mock.patch("builtins.input", side_effect=answers):
             try:
-                with unittest.mock.patch('sys.exit',
-                                         lambda *args: early_jump('user pressed Q')):
+                with unittest.mock.patch(
+                    "sys.exit", lambda *args: early_jump("user pressed Q")
+                ):
                     cmd.scaffold(self.output)
-                self.assertTrue(False, 'sys exit not triggered')
+                self.assertTrue(False, "sys exit not triggered")
             except SystemExit:
                 self.assertTrue(True)
 
         # path exists and the folder is empty
         shutil.rmtree(self.output, ignore_errors=True)
         os.makedirs(self.output, exist_ok=True)
-        answers = ['31']
-        with unittest.mock.patch('builtins.input', side_effect=answers):
+        answers = ["31"]
+        with unittest.mock.patch("builtins.input", side_effect=answers):
             cmd.scaffold(self.output)
 
-        self.assertTrue(os.path.exists(os.path.join(self.output, 'defaults.yaml')))
+        self.assertTrue(os.path.exists(os.path.join(self.output, "defaults.yaml")))
 
         # non exist index
         shutil.rmtree(self.output, ignore_errors=True)
         os.makedirs(self.output, exist_ok=True)
-        with unittest.mock.patch('builtins.input', side_effect=['99']):
+        with unittest.mock.patch("builtins.input", side_effect=["99"]):
             cmd.scaffold(self.output)
 
         # chose logging
         shutil.rmtree(self.output, ignore_errors=True)
         os.makedirs(self.output, exist_ok=True)
-        with unittest.mock.patch('builtins.input', side_effect=['0']):
+        with unittest.mock.patch("builtins.input", side_effect=["0"]):
             cmd.scaffold(self.output)
 
     def test_007_cmd_build(self):
         cmd = Command()
 
         os.makedirs(self.output)
-        with unittest.mock.patch('builtins.input', side_effect=['31']):
+        with unittest.mock.patch("builtins.input", side_effect=["31"]):
             cmd.scaffold(self.output)
 
         # normal run
@@ -193,28 +187,32 @@ class TestCfg4Py(unittest.TestCase):
         # path not exists run
         shutil.rmtree(self.output)
         try:
-            with unittest.mock.patch('sys.exit',
-                                     lambda *args: early_jump('Path not exists')):
+            with unittest.mock.patch(
+                "sys.exit", lambda *args: early_jump("Path not exists")
+            ):
                 cmd.build(self.output)
-            self.assertTrue(False, 'sys.exit not triggered')
+            self.assertTrue(False, "sys.exit not triggered")
         except SystemExit:
             self.assertTrue(True)
 
         # no files in self.output
         os.makedirs(self.output, exist_ok=True)
         try:
-            with unittest.mock.patch('sys.exit',
-                                     lambda *args: early_jump('no files in folder')):
+            with unittest.mock.patch(
+                "sys.exit", lambda *args: early_jump("no files in folder")
+            ):
                 cmd.build(self.output)
-            self.assertTrue(False, 'sys.exit not triggered')
+            self.assertTrue(False, "sys.exit not triggered")
         except SystemExit:
             self.assertTrue(True)
 
     def test_008_enable_logging(self):
-        os.makedirs(self.output, 0O777, exist_ok=True)
-        cfg4py.enable_logging(log_file=os.path.join(self.output, "cfg4py.log"),
-                              file_size=1e-6,
-                              file_count=3)
+        os.makedirs(self.output, 0o777, exist_ok=True)
+        cfg4py.enable_logging(
+            log_file=os.path.join(self.output, "cfg4py.log"),
+            file_size=1e-6,
+            file_count=3,
+        )
         logger.info("%s", ["test log"])
 
     def test_009_set_server_role(self):
@@ -223,14 +221,14 @@ class TestCfg4Py(unittest.TestCase):
 
     def test_010_read_envar(self):
         tmpdir = tempfile.gettempdir()
-        cfg4dir = os.path.join(tmpdir, 'cfg4py_test')
-        config_file = os.path.join(cfg4dir, 'defaults.yaml')
+        cfg4dir = os.path.join(tmpdir, "cfg4py_test")
+        config_file = os.path.join(cfg4dir, "defaults.yaml")
         os.makedirs(cfg4dir, 0o777, exist_ok=True)
-        os.environ['account'] = 'aaron'
+        os.environ["account"] = "aaron"
         content = ["account: ${account}", "\n"]
 
-        with open(config_file, 'w+') as f:
+        with open(config_file, "w+") as f:
             f.writelines("\n".join(content))
 
         cfg = cfg4py.init(cfg4dir)
-        self.assertEqual(cfg.account, 'aaron')
+        self.assertEqual(cfg.account, "aaron")

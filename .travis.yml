@@ -16,16 +16,18 @@ script: tox
 # create the Github repo and add it to Travis, run the
 # following command to finish PyPI deployment setup:
 # $ travis encrypt --add deploy.password
-#deploy:
-#  provider: pypi
-#  distributions: sdist bdist_wheel
-#  user: "__token__"
-#  password:
-#    secure: PLEASE_REPLACE_ME
-#  on:
-#    tags: true
-#    repo: zillionare/cfg4py
-#    python: 3.8
+deploy:
+  provider: pypi
+  distributions: sdist bdist_wheel
+  user: __token__
+  password:
+    secure: ZSUoe4S4nC+e+ePLmxrruPXXngNf9EDlAxy4zbwciq2GvFbi5kscldmjYy9jPMHfwVkObW8qXL7oKD0RpMNl+5uG/yDHFXvVOcPTi6FLjiGM+PEtJU51dOTWwodsQGa0i182DmgesuzDd5HkRjLeopiTITDBSYNhw1jTqe0P2o2ac9ikSDniWkKuwS5XLiMaOH4iwfA2IBo8l48WCFjsd60bO5oRUYHk6gMvICZdejZ2QerluhS3n9CXZm7UogHaSx7tvvifAIbmFpPIadlxhEj9kq2SSB1jS1ELLYKSBV2nSRoTkFCOGHmBZBwJXy8wuLe5V2f523Z7x5VOOJwUtu7gC2k8OLvsF/AELKXqGocJr0oyowbD5xg64cTq9bj8zDWFA9AeSWm9fouPXhvM0Q2BLxXK68AclTmpOwAmlfLmRXQ8KxptlI78nAsoc0SpeQ//a8IBT9K+xW6n/ZQyPRz0v0pYLYsWNK3XnJvvvA1H9eZOdmUrBdakJiOBFi3KLPSt4wTyeoQOabG5uEIj/uavApC/te9gLkRAuZLRhDk7sc9wqOH0mq3NE925reSyQJIAnuD3c9af7fDWvnrQ1H6NuXqek4iqBV7/e2sFMj3VMuou9bReBvd1rKefcJFtYtrFFDbDkWnExdCVy+uXzK9jz5Xut5niJhNqduSRmE4=
+  on:
+    branch: release
+    python:
+      - 3.8
+      - 3.7
+      - 3.6
 
 services:
   - redis-server
