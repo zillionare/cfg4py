@@ -1,10 +1,11 @@
 logging:
+  disable_existing_loggers: false
   handlers:
-    file:
-      filename: /tmp/cfg4py.demo.log
+    console:
+      class: logging.StreamHandler
   root:
     level: INFO
-    handlers: [file]
+    handlers: [console]
 
 services:
     redis:

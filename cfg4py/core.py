@@ -6,13 +6,12 @@ from collections.abc import Mapping
 from io import StringIO
 
 from apscheduler.schedulers.background import BackgroundScheduler
+from cfg4py.config import Config
 from ruamel.yaml import YAML
 from ruamel.yaml import error as yaml_error
 from ruamel.yaml.error import YAMLError
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
-
-from cfg4py.config import Config
 
 logger = logging.getLogger(__name__)
 
@@ -173,7 +172,7 @@ def build(save_to: str):
 
     no_instance = [
         f"{' ' * 4}def __init__(self):\n",
-        f"{' ' * 8}raise TypeError('Do NOT instantiate this class')\n",
+        f"{' ' * 8}raise TypeError(\"Do NOT instantiate this class\")\n\n",
     ]
     lines.extend(no_instance)
     with open(save_to, encoding="utf-8", mode="w") as f:
@@ -344,7 +343,6 @@ def _load_from_local_file() -> dict:
     conf = {}
 
     role = os.getenv(envar, "")
-    logger.info("server role is %s", role)
     if role == "":
         msg = f"You must config environment variables {envar} as one of"
         "'DEV, TEST, PRODUCTION'"
