@@ -5,7 +5,9 @@ Usage
 Quick Guide
 -----------
 
-To use Cfg4Py in a project::
+To use Cfg4Py in a project:
+
+.. code:: python
 
     import cfg4py
 
@@ -32,8 +34,11 @@ Step 1.
 ~~~~~~~
 Use Cfg4Py tool to generate configuration templates:
 
-.. code-block::shell
-        cfg4py scaffold
+.. code:: console
+
+    cfg4py scaffold
+
+The output is:
 
 .. image:: static/scaffold.png
 
@@ -43,10 +48,12 @@ Step 2.
 ~~~~~~~
 Build config class, and import it into your project:
 
-.. code-block::bash
+.. code-block:: console
+
         cfg4py build /path/to/your/config/dir
 
-.. code-block::python
+.. code-block:: python
+
         from typing import TYPE_CHECKING
         if TYPE_CHECKING:
             # make sure that schema is at your $PYTHONPATH
@@ -63,10 +70,11 @@ Step 3.
 cfg4py will take care of setting's change automatically, all you need to do is put correct settings into either
 (defaults, dev, test, production) config file. And once you change the settings, it should take effect at once.
 
-You can also configure a remote source by implemented a subclass of `RemoteConfigFetcher`. A redis fetcher is
+To enable cascading config, you can configure a remote source by implemented a subclass of `RemoteConfigFetcher`. A redis fetcher is
 provided out-of-box:
 
-.. code-block::python
+.. code-block:: python
+
         from cfg4py import RedisConfigFetcher
         from redis import StrictRedis
 
@@ -82,15 +90,27 @@ Step 4.
 Before starting run your application, you should set __cfg4py_server_role__ to any of [DEV,TEST,PRODUCTION]. You can
 run the following command to get the help:
 
-.. code-block::bash
+.. code-block:: bash
+
         cfg4py hint set_server_role
+
+.. hint::
+
+        since 0.9.0, you can skip this step, if you don't need adaptive deployment support.
 
 Use cfg4py as a cheat sheet
 ----------------------------
-cfg4py does more than a config module, it can be a cheat sheet for many configurations. For example, want to know how
-to config a conda source?
+cfg4py does more than a config module, it can be a cheat sheet for many configurations. For example, want to change pip source (usually you'll if you're in china mainland):
 
-.. code-block::bash
-        cfg4py hint conda --usage
+.. code-block:: console
 
-It'll tell you how to change conda source channels by either command or modifying conda config file.
+        cfg4py hint pip
+
+        >
+        - tsinghua: pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple
+        - aliyun: pip config set global.index-url https://mirrors.aliyun.com/pypi/simple/
+        - tencent: pip config set global.index-url http://mirrors.cloud.tencent.com/pypi/simple
+        - douban: pip config set global.index-url http://pypi.douban.com/simple/
+
+
+for more, explore by yourself by typing `cfg4py hint`

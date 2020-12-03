@@ -5,12 +5,13 @@ import re
 from collections.abc import Mapping
 from io import StringIO
 
+from watchdog.events import FileModifiedEvent, FileSystemEventHandler
+from watchdog.observers import Observer
+
 from apscheduler.schedulers.background import BackgroundScheduler
 from cfg4py.config import Config
 from ruamel.yaml import YAML
 from ruamel.yaml.error import YAMLError
-from watchdog.events import FileModifiedEvent, FileSystemEventHandler
-from watchdog.observers import Observer
 
 logger = logging.getLogger(__name__)
 

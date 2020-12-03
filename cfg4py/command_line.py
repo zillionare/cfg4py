@@ -57,9 +57,6 @@ class Command:
             sys.exit(-1)
 
         try:
-            # set server role temporarily
-            os.environ["__cfg4py_server_role__"] = "DEV"
-
             init(config_dir)
             sys.path.insert(0, config_dir)
             from schema import Config  # type: ignore # noqa

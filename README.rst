@@ -23,7 +23,7 @@ Overview
 
 A python config module that:
 
-1. Adaptive deployment environment (default, dev, test, production) support
+1. Adaptive deployment (default, dev, test, production) support
 2. Cascading configuration (central vs local) support
 3. Auto-complete
 4. Templates (logging, database, cache, message queue,...)
@@ -46,7 +46,11 @@ In any serious projects, your application may run at both development, testing a
 
 To solve this, Cfg4Py developed a mechanism, that you provide different sets for configurations: dev for development machine, test for testing environment and production for production site, and all common settings are put into a file called `defaults`.
 
-cfg4py module knows which environment it's running on by lookup environment variable __cfg4py_server_role__. It should be one of `DEV`, `TEST` and `PRODUCTION`. If nothing found, it means setup is not finished, and Cfg4Py will refuse to work. If the environment is set, then Cfg4Py will read settings from defaults set, then apply update from either of `DEV`, `TEST` and `PRODUCTION` set, according to the environment the application is running on.
+cfg4py module knows which environment it's running on by looking up environment variable __cfg4py_server_role__. It should be one of `DEV`, `TEST` and `PRODUCTION`. If nothing found, it means setup is not finished, and Cfg4Py will refuse to work. If the environment is set, then Cfg4Py will read settings from defaults set, then apply update from either of `DEV`, `TEST` and `PRODUCTION` set, according to the environment the application is running on.
+
+.. important::
+
+    Since 0.9.0, cfg4py can still work if __cfg4py_server_role__ is not set, when it work at non-strict mode.
 
 Cascading design
 --------------------
@@ -61,7 +65,8 @@ This is how Cfg4Py solves the problem:
 Auto-complete
 -------------
 
-.. image:: static/auto-complete.gif
+.. image:: http://images.jieyu.ai/images/projects/cfg4py/auto-complete.gif
+
 
 With other python config module, you have to remember all the configuration keys, and refer to each settings by something like cfg["services"]["redis"]["host"] and etc. Keys are hard to rememb, prone to typo, and way too much tedious.
 
@@ -79,7 +84,7 @@ vs:
 
 Apparently the latter is the better.
 
-And, if you trigger a build against your configurations, it'll generate a python class file. After you import this file (named 'schema.py') into your project, then you can enjoy auto-complete!
+And, if you trigger a build against your configurations, it'll generate a python class file. After you import this file (named 'schema.py') into your project, then you can enjoy code auto-complete!
 
 Templates
 ----------
@@ -87,7 +92,8 @@ It's hard to remember how to configure log, database, cache and etc, so cfg4py p
 
 Just run cfg4py scaffold, follow the tips then you're done.
 
-.. image:: static/scaffold.png
+.. image:: http://images.jieyu.ai/images/projects/cfg4py/scaffold.png
+
 
 Environment variables macro
 ----------------------------
