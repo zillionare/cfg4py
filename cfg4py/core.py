@@ -8,7 +8,6 @@ from io import StringIO
 from apscheduler.schedulers.background import BackgroundScheduler
 from cfg4py.config import Config
 from ruamel.yaml import YAML
-from ruamel.yaml import error as yaml_error
 from ruamel.yaml.error import YAMLError
 from watchdog.events import FileModifiedEvent, FileSystemEventHandler
 from watchdog.observers import Observer
@@ -26,9 +25,9 @@ yaml = YAML(typ="safe")
 _local_observer = None
 _cfg_obj = Config()
 
-_cfg_default = {}
 _cfg_local = {}
 _cfg_remote = {}
+_strict = True
 
 _local_config_dir: str = ""
 
@@ -172,7 +171,7 @@ def build(save_to: str):
 
     no_instance = [
         f"{' ' * 4}def __init__(self):\n",
-        f"{' ' * 8}raise TypeError(\"Do NOT instantiate this class\")\n\n",
+        f"{' ' * 8}raise TypeError(\"Do NOT instantiate this class\")\n",
     ]
     lines.extend(no_instance)
     with open(save_to, encoding="utf-8", mode="w") as f:
@@ -210,7 +209,7 @@ def _schema_from_obj_(obj, lines, depth: int = 0):
     return lines
 
 
-def init(local_cfg_path: str = None, dump_on_change=True):
+def init(local_cfg_path: str = None, dump_on_change=True, strict=False):
     """
     create cfg object.
     Args:
@@ -222,7 +221,9 @@ def init(local_cfg_path: str = None, dump_on_change=True):
     """
     global _local_config_dir, _dump_on_change, _remote_fetcher, _local_observer
     global _cfg_obj, _cfg_local, _cfg_remote
+    global _strict
 
+    _strict = strict
     _dump_on_change = dump_on_change
     if local_cfg_path:
         _local_config_dir = os.path.expanduser(local_cfg_path)
@@ -338,12 +339,13 @@ def _load_from_local_file() -> dict:
 
     Returns:
 
-    Todo: add other known file format support with third-party parsers
     """
+    global _strict
+
     conf = {}
 
     role = os.getenv(envar, "")
-    if role == "":
+    if role == "" and _strict:
         msg = f"You must config environment variables {envar} as one of"
         "'DEV, TEST, PRODUCTION'"
         raise EnvironmentError(msg)
@@ -369,13 +371,14 @@ def _load_from_local_file() -> dict:
             ) as test:
                 _test = _load_and_replace_envar(test.read(-1))
                 _mixin(conf, _test)
-
-        else:
+        elif role == "DEV":
             with open(
                 os.path.join(_local_config_dir, f"dev{ext}"), "r", encoding="utf-8"
             ) as dev:
                 _dev = _load_and_replace_envar(dev.read(-1))
                 _mixin(conf, _dev)
+        else:
+            pass
     except FileNotFoundError as e:
         if e.filename.find("defaults") != -1:
             raise FileNotFoundError("Failed to find default configuration file")

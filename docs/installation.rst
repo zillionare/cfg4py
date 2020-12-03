@@ -32,7 +32,7 @@ You can either clone the public repository:
 
 .. code-block:: console
 
-    $ git clone 
+    $ git clone
 
 Or download the `tarball`_:
 

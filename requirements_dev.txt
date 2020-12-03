@@ -10,6 +10,7 @@ twine==1.14.0
 redis==3.4.0
 apscheduler>=3.6.3
 pre-commit==2.8.2
+doc8 == 0.8.1
 
 # refer to setup.py
 .

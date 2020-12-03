@@ -42,7 +42,7 @@ class TestCfg4Py(unittest.TestCase):
     def test_000_create_config(self):
         """Test something."""
         logger.info("resource_path is %s", self.resource_path)
-        cfg = cfg4py.init(self.resource_path)
+        cfg = cfg4py.init(self.resource_path, strict=True)
         self.assertEqual(cfg.services.redis.host, "127.0.0.1")
 
     def test_001_update_config(self):
@@ -75,7 +75,7 @@ class TestCfg4Py(unittest.TestCase):
         from cfg4py.resources.schema import Config
 
         os.environ["__cfg4py_server_role__"] = "DEV"
-        cfg: Config = cfg4py.init(self.resource_path)
+        cfg: Config = cfg4py.init(self.resource_path, strict=True)
         print("cfg.services.redis.host is", cfg.services.redis.host)
 
     def test_003_config_remote_fetcher(self):
@@ -100,7 +100,7 @@ class TestCfg4Py(unittest.TestCase):
             ),
         )
 
-        cfg = cfg4py.init(self.resource_path)
+        cfg = cfg4py.init(self.resource_path, strict=True)
         fetcher = RedisConfigFetcher(key="my_app_config")
         logger.info("configuring a remote fetcher")
         cfg4py.config_remote_fetcher(fetcher, 0.1)
@@ -181,7 +181,7 @@ class TestCfg4Py(unittest.TestCase):
 
         # normal run
         cmd.build(self.output)
-        cfg = cfg4py.init(self.output)
+        cfg = cfg4py.init(self.output, strict=True)
         self.assertEqual(cfg.postgres.dsn, "dbname=test user=postgres password=secret")
 
         # path not exists run
@@ -230,5 +230,10 @@ class TestCfg4Py(unittest.TestCase):
         with open(config_file, "w+") as f:
             f.writelines("\n".join(content))
 
-        cfg = cfg4py.init(cfg4dir)
+        cfg = cfg4py.init(cfg4dir, strict=True)
         self.assertEqual(cfg.account, "aaron")
+
+    def test_011_non_strict_mode(self):
+        os.environ[cfg4py.envar] = ""
+        cfg = cfg4py.init(self.resource_path, strict=False)
+        self.assertEqual(cfg.services.redis.host, "localhost")

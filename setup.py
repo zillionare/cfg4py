@@ -14,7 +14,7 @@ requirements = [
     "watchdog>=0.9.0",
     "apscheduler>=3.6.3",
     "fire>=0.2.1",
-    "ruamel.yaml==0.16.0",
+    "ruamel.yaml>=0.16.0",
 ]
 
 setup_requirements = []
@@ -24,7 +24,7 @@ setup(
     author_email="aaron_yang@jieyu.ai",
     python_requires=">=3.6",
     classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 3 - Alpha",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: BSD License",
         "Natural Language :: English",
@@ -32,7 +32,7 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
     ],
-    description="Cascading, adaptive and auto-complete supported Python config module",
+    description="Easy config module supports cascading design, adpative deployment, auto code complete and more",
     install_requires=requirements,
     license="BSD license",
     long_description=readme + "\n\n" + history,
