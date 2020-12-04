@@ -4,9 +4,8 @@ include HISTORY.rst
 include LICENSE
 include README.rst
 
-recursive-include cfg4py/resources *
+include cfg4py/resources/template.yaml
 recursive-include docs/static *
-exclude cfg4py/resources/schema.py
 recursive-include tests *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]

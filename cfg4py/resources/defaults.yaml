@@ -24,6 +24,10 @@ logging:
     level: INFO
     handlers: [file, console]
 
+tz: Asia/Shanghai
+hello:
 services:
     redis:
         host: localhost
+
+foo: bar

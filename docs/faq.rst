@@ -1,12 +1,14 @@
 FAQ
 ===
-- Q. What is schema.py? ::
+1. What is schema.py?
 
-  A. It's generated for code completion. It's safe to keep it in both development environment and release package. Don't try to instantiate it (an TypeError will raise to prevent from instantiate it), you should only use it for typing annotation.
+  It's generated for code completion. It's safe to keep it in both development environment and release package. Don't try to instantiate it (an TypeError will raise to prevent from instantiate it), you should only use it for typing annotation.
 
-- Q. Why after upgrade to 0.9.0, cfg4py doesn't work as before? ::
+2. Why after upgrade to 0.9.0, cfg4py doesn't work as before?
 
-  A. v0.9 introduced `strict` mode, which is False by default. What it exactly do is, allow you use cfg4py without set environment variable __cfg4py_server_role__ (non-strict mode). So if you've used cfg4py for a while and it worked, then you need to modify your code where it initialize cfg4py as:
+  v0.9 introduced `strict` mode, which is False by default. When cfg4py is initialized with ```strict = True```, cfg4py works only if __cfg4py_server_role__ is set; if it's non-strict mode, cfg4py works with __cfg4py_server_role__ is not set.
+
+  So if you've used cfg4py for a while and it worked before v0.9, then you need to modify your code where it initialize cfg4py as:
 
   .. code:: python
 

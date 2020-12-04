@@ -226,6 +226,14 @@ class Command:
          accordingly"
         print(msg)
 
+    def version(self):
+        from cfg4py import __version__
+
+        print(
+            "Easy config module support code complete, cascading design and apative deployment"
+        )
+        print(f"version: {__version__}")
+
 
 def main():
     cmd = Command()  # pragma: no cover
@@ -235,6 +243,8 @@ def main():
             "scaffold": cmd.scaffold,
             "hint": cmd.hint,
             "set_server_role": cmd.set_server_role,
+            "--version": cmd.version,
+            "-v": cmd.version(),
         }
     )
 

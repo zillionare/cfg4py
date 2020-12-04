@@ -7,7 +7,7 @@ Submodules
 cfg4py.command\_line module
 ---------------------------
 
-.. automodule:: cfg4py.command_line
+.. automodule:: cfg4py.cli
    :members:
    :undoc-members:
    :show-inheritance:

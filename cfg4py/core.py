@@ -172,12 +172,15 @@ def build(save_to: str):
 
     no_instance = [
         f"{' ' * 4}def __init__(self):\n",
-        f"{' ' * 8}raise TypeError(\"Do NOT instantiate this class\")\n",
+        f"{' ' * 8}raise TypeError(\"Do NOT instantiate this class\")\n\n",
     ]
     lines.extend(no_instance)
     with open(save_to, encoding="utf-8", mode="w") as f:
         lines = _schema_from_obj_(_cfg_obj, lines)
-        f.writelines("".join(lines))
+        content = re.sub("\n+$", "\n", "".join(lines))
+
+        f.write(content)
+        # f.writelines("".join(lines))
 
 
 def _schema_from_obj_(obj, lines, depth: int = 0):
@@ -194,7 +197,6 @@ def _schema_from_obj_(obj, lines, depth: int = 0):
                 continue
 
             if isinstance(child, Config):
-                lines.append("\n")
                 lines.append(f"{' ' * 4 * depth}class {name}:\n")
                 _schema_from_obj_(child, lines, depth)
             else:
@@ -204,6 +206,7 @@ def _schema_from_obj_(obj, lines, depth: int = 0):
                     lines.append(f"{' ' * 4 * depth}{name}: Optional[{_type}] = None\n")
                 else:
                     lines.append(f"{' ' * 4 * depth}{name} = None\n")
+                lines.append("\n")
     else:
         print(obj)
 

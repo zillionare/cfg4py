@@ -11,7 +11,7 @@ import unittest.mock
 
 import cfg4py
 from cfg4py import core
-from cfg4py.command_line import Command
+from cfg4py.cli import Command
 
 logger = logging.getLogger(__name__)
 
