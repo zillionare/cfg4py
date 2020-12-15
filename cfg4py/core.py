@@ -63,7 +63,11 @@ class RedisConfigFetcher(RemoteConfigFetcher):
 
 class LocalConfigChangeHandler(FileSystemEventHandler):
     def dispatch(self, event):
-        if isinstance(event, FileModifiedEvent):
+        if not isinstance(event, FileModifiedEvent):
+            return
+
+        ext = os.path.splitext(event.src_path)
+        if ext in [".yml", ".yaml"]:
             _load_from_local_file()
 
 

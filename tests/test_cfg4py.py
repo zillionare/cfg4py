@@ -7,7 +7,7 @@ import sys
 import tempfile
 import time
 import unittest
-import unittest.mock
+from unittest.mock import patch
 
 import cfg4py
 from cfg4py import core
@@ -237,3 +237,27 @@ class TestCfg4Py(unittest.TestCase):
         os.environ[cfg4py.envar] = ""
         cfg = cfg4py.init(self.resource_path, strict=False)
         self.assertEqual(cfg.services.redis.host, "localhost")
+
+    def test_012_only_yml_files(self):
+        tmpdir = tempfile.gettempdir()
+        cfg4dir = os.path.join(tmpdir, "cfg4py_test/")
+        os.makedirs(cfg4dir, 0o777, exist_ok=True)
+
+        os.environ["account"] = "aaron"
+        content = ["account: ${account}", "\n"]
+
+        config_file = os.path.join(cfg4dir, "defaults.yaml")
+
+        with open(config_file, "w+") as f:
+            f.writelines("\n".join(content))
+
+        cfg4py.init(cfg4dir)
+
+        with patch(
+            "cfg4py.core._load_from_local_file",
+            side_effect=Exception("I should NOT be invoked"),
+        ):
+            touchme = os.path.join(cfg4dir, "ignore_me.test")
+
+            with open(touchme, "w") as f:
+                f.writelines("whenever you see this file, delete it")
