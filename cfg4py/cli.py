@@ -4,8 +4,9 @@ import sys
 from typing import Optional
 
 import fire
-from cfg4py import enable_logging, envar, init
 from ruamel.yaml import YAML
+
+from cfg4py import enable_logging, envar, init
 
 enable_logging()
 

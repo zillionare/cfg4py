@@ -105,3 +105,4 @@ ENV/
 .vscode/
 /.idea/
 /cfg4py/resources/schema.py
+.history

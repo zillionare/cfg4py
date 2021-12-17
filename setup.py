@@ -31,6 +31,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
     ],
     description="Easy config module supports cascading design, adpative deployment, auto code complete and more",
     install_requires=requirements,
@@ -42,7 +43,7 @@ setup(
     packages=find_packages(include=["cfg4py", "cfg4py.*"]),
     setup_requires=setup_requirements,
     url="https://github.com/zillionare/cfg4py",
-    version="0.9.1",
+    version="0.9.2",
     zip_safe=False,
     entry_points={"console_scripts": ["cfg4py=cfg4py.cli:main"]},
 )
