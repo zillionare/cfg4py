@@ -18,3 +18,7 @@ FAQ
     cfg4py.init('path_to_config_dir_as_before', strict = True)
 
   if you don't specify `strict = True`, cfg4py still works, but it will NOT read config under the name 'dev.yaml', 'test.yaml' or 'production.yaml'
+
+3. Why `cfg.logging` acts like dict? 
+
+  Because `cfg.logging`` is a dict. `cfg.logging` is provided since 0.9.3, in case one may need it, for example, get the log file location. However, logging settings may contains key that is python's reserved word, thus it's not possible to convert it into python's object (It's not allowed to use python's reserved word as object's member)

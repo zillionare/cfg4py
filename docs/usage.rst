@@ -67,11 +67,10 @@ Build config class, and import it into your project:
 
 Step 3.
 ~~~~~~~
-cfg4py will take care of setting's change automatically, all you need to do is put correct settings into either
-(defaults, dev, test, production) config file. And once you change the settings, it should take effect at once.
+cfg4py will take care of setting's change automatically, all you need to do is put correct settings into one of
+(defaults, dev, test, production) config file. And once you change the settings, it should take effect immediately.
 
-To enable cascading config, you can configure a remote source by implemented a subclass of `RemoteConfigFetcher`. A redis fetcher is
-provided out-of-box:
+To enable cascading config, you can configure a remote source by implemented a subclass of `RemoteConfigFetcher`. A redis fetcher is provided out-of-box:
 
 .. code-block:: python
 
@@ -87,8 +86,7 @@ The settings in redis under `key` should be a json string, which can be converte
 
 Step 4.
 ~~~~~~~~
-Before starting run your application, you should set __cfg4py_server_role__ to any of [DEV,TEST,PRODUCTION]. You can
-run the following command to get the help:
+Before starting run your application, you should set __cfg4py_server_role__ to any of [DEV,TEST,PRODUCTION] (since 0.9.0, required only if you specified as `strict` mode). You can run the following command to get the help:
 
 .. code-block:: bash
 

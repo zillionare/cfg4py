@@ -287,3 +287,9 @@ class TestCfg4Py(unittest.TestCase):
 
         # signaled twice (closed, modified) for each write
         self.assertTrue(mocked_handler.call_count > 3)
+
+    def test_014_check_logging(self):
+        # according to issue #4, we should return logging settings
+        cfg = cfg4py.init(self.resource_path)
+        self.assertTrue(getattr(cfg, "logging", None))
+        self.assertTrue(cfg.logging.get("handlers"))

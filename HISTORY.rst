@@ -36,10 +36,12 @@ History
 
 0.9.2 (2021-12-17)
 ---------------------
-* hot-reload will now only react to configuration files's change. Check `issue <https://github.com/zillionare/cfg4py/issues/1>`_ here.
+* hot-reload will now only react to configuration files's change. Check `issue 1 <https://github.com/zillionare/cfg4py/issues/1>`_ here.
 
 0.9.3 (2022-06-03)
 ---------------------
 * on apple m1, it's not able to watch file changes, and cause cfg4py fail. This revision will disable hot-reload in such scenario and user can still use all other functions of cfg4py.
+* remove support for python 3.6 since it's out of service, and opt 3.10, 3.11 in
+* log settings are now available by `cfg.logging`. Check `issue 4 <https://github.com/zillionare/cfg4py/issues/4>`_ here
 
 

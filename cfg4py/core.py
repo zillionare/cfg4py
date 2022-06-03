@@ -270,13 +270,19 @@ def update_config(conf: dict):
 
     if "logging" in conf:
         _process_logging_settings(conf["logging"])
+        logconf = conf["logging"].copy()
 
+        # logging settings usually contains python keywork, for example class
+        # thus these keys cannot be treated as Config's members
         del conf["logging"]
 
     if _dump_on_change:
         logger.info("configuration is\n%s", yaml_dump(conf))
 
     _to_obj(_cfg_obj, conf)
+    if "logconf" in locals():
+        _cfg_obj.logging = logconf
+
     return _cfg_obj
 
 
