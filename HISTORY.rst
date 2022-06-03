@@ -33,3 +33,13 @@ History
     cfg4py.init('path_to_config_dir', strict = True)
 
     see more in usage and FAQ document
+
+0.9.2 (2021-12-17)
+---------------------
+* hot-reload will now only react to configuration files's change. Check `issue <https://github.com/zillionare/cfg4py/issues/1>`_ here.
+
+0.9.3 (2022-06-03)
+---------------------
+* on apple m1, it's not able to watch file changes, and cause cfg4py fail. This revision will disable hot-reload in such scenario and user can still use all other functions of cfg4py.
+
+

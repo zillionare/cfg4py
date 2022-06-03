@@ -43,7 +43,7 @@ setup(
     packages=find_packages(include=["cfg4py", "cfg4py.*"]),
     setup_requires=setup_requirements,
     url="https://github.com/zillionare/cfg4py",
-    version="0.9.2",
+    version="0.9.3",
     zip_safe=False,
     entry_points={"console_scripts": ["cfg4py=cfg4py.cli:main"]},
 )

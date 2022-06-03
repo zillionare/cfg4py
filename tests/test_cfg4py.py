@@ -7,6 +7,7 @@ import sys
 import tempfile
 import time
 import unittest
+from unittest import mock
 from unittest.mock import patch
 
 import cfg4py
@@ -261,3 +262,28 @@ class TestCfg4Py(unittest.TestCase):
 
             with open(touchme, "w") as f:
                 f.writelines("whenever you see this file, delete it")
+
+    @mock.patch("cfg4py.core.LocalConfigChangeHandler.dispatch")
+    def test_013_watch(self, mocked_handler):
+        """test watch file change"""
+        tmpdir = tempfile.gettempdir()
+        cfg4dir = os.path.join(tmpdir, "cfg4py_test/")
+        os.makedirs(cfg4dir, 0o777, exist_ok=True)
+
+        os.environ["account"] = "aaron"
+        content = ["account: ${account}", "\n"]
+
+        config_file = os.path.join(cfg4dir, "defaults.yaml")
+
+        with open(config_file, "w+") as f:
+            f.writelines("\n".join(content))
+
+        cfg4py.init(cfg4dir)
+
+        for i in range(3):
+            time.sleep(1)
+            with open(config_file, "w+") as f:
+                f.writelines(f"\n{i}".join(content))
+
+        # signaled twice (closed, modified) for each write
+        self.assertTrue(mocked_handler.call_count > 3)

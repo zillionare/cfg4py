@@ -27,7 +27,7 @@ class Command:
         self.transformed = self._transform()
 
     def build(self, config_dir: str):
-        """Compile configuration files into a python class file, which is used by IDE's
+        """Compile configuration files into python script, which is used by IDE's
         auto-complete function
 
         Args:

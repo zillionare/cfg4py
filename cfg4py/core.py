@@ -236,19 +236,20 @@ def init(local_cfg_path: str = None, dump_on_change=True, strict=False):
     if local_cfg_path:
         _local_config_dir = os.path.expanduser(local_cfg_path)
 
-        # handle local configuration file change
-        _local_observer = Observer()
-        _local_observer.schedule(
-            LocalConfigChangeHandler(), _local_config_dir, recursive=False
-        )
-        _local_observer.start()
-
         _cfg_local = _load_from_local_file()
         update_config(_mixin(_cfg_remote, _cfg_local))
 
-        # todo: will this overwrite existing file occasionally?
-        save_to = os.path.join(_local_config_dir, "schema.py")
-        build(save_to)
+        try:
+            # handle local configuration file change, this may not be available on some platform, like apple m1
+            _local_observer = Observer()
+            _local_observer.schedule(
+                LocalConfigChangeHandler(), _local_config_dir, recursive=False
+            )
+            _local_observer.start()
+        except Exception as e:
+            logger.exception(e)
+            logger.warning("failed to watch file changes. Hot-reload is not available")
+
     return _cfg_obj
 
 
