@@ -35,7 +35,7 @@ jobs:
           --health-retries 5
         ports:
           - 6379:6379
-          
+
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
@@ -57,6 +57,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
+      - uses: docker-practice/actions-setup-docker@master
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
