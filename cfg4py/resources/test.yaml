@@ -1,0 +1,12 @@
+logging:
+  disable_existing_loggers: false
+  handlers:
+    console:
+      class: logging.StreamHandler
+  root:
+    level: INFO
+    handlers: [console]
+
+services:
+    redis:
+        host: 127.0.0.1

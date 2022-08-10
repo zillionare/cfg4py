@@ -1,0 +1,103 @@
+[tool]
+[tool.poetry]
+name = "cfg4py"
+version = "0.9.3"
+homepage = "https://github.com/zillionare/cfg4py"
+description = "Easy config (template, auto-complete), hierarchichal design, monitor config change and load on-the-fly ."
+authors = ["Aaron Yang <aaron_yang@jieyu.ai>"]
+readme = "README.md"
+license =  "MIT"
+classifiers=[
+    'Development Status :: 2 - Pre-Alpha',
+    'Intended Audience :: Developers',
+    'License :: OSI Approved :: MIT License',
+    'Natural Language :: English',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.7',
+    'Programming Language :: Python :: 3.8',
+    'Programming Language :: Python :: 3.9',
+    'Programming Language :: Python :: 3.10',
+]
+packages = [
+    { include = "cfg4py" },
+    { include = "tests", format = "sdist" },
+]
+
+[tool.poetry.dependencies]
+python = ">=3.7.1,<4.0"
+fire = "0.4.0"
+
+black  = { version = "^22.3.0", optional = true}
+isort  = { version = "5.10.1", optional = true}
+flake8  = { version = "4.0.1", optional = true}
+flake8-docstrings = { version = "^1.6.0", optional = true }
+pytest  = { version = "^7.0.1", optional = true}
+pytest-cov  = { version = "^3.0.0", optional = true}
+tox  = { version = "^3.24.5", optional = true}
+virtualenv  = { version = "^20.13.1", optional = true}
+pip  = { version = "^22.0.3", optional = true}
+mkdocs  = { version = "^1.2.3", optional = true}
+mkdocs-include-markdown-plugin  = { version = "^3.2.3", optional = true}
+mkdocs-material  = { version = "^8.1.11", optional = true}
+mkdocstrings  = { version = "^0.18.0", optional = true}
+mkdocs-material-extensions  = { version = "^1.0.3", optional = true}
+twine  = { version = "^3.8.0", optional = true}
+mkdocs-autorefs = {version = "^0.3.1", optional = true}
+pre-commit = {version = "^2.17.0", optional = true}
+toml = {version = "^0.10.2", optional = true}
+livereload = {version = "^2.6.3", optional = true}
+pyreadline = {version = "^2.1", optional = true}
+watchdog = "^2.1.9"
+APScheduler = "^3.9.1"
+"ruamel.yaml" = "^0.17.21"
+redis = {version = "^4.3.4", optional = true}
+mike = "^1.1.2"
+
+[tool.poetry.extras]
+test = [
+    "pytest",
+    "black",
+    "isort",
+    "flake8",
+    "flake8-docstrings",
+    "pytest-cov",
+    "redis"
+    ]
+
+dev = ["tox", "pre-commit", "virtualenv", "pip", "twine", "toml"]
+
+doc = [
+    "mkdocs",
+    "mkdocs-include-markdown-plugin",
+    "mkdocs-material",
+    "mkdocstrings",
+    "mkdocs-material-extension",
+    "mkdocs-autorefs"
+    ]
+
+[tool.poetry.scripts]
+cfg4py = 'cfg4py.cli:main'
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.black]
+line-length = 88
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+[tool.isort]
+profile = "black"

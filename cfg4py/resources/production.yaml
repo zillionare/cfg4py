@@ -1,0 +1,7 @@
+logging:
+  handlers:
+    file:
+      filename: /var/log/cfg4py/demo.log
+  root:
+    level: INFO
+    handlers: [file]
