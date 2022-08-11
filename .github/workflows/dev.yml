@@ -53,8 +53,6 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install tox tox-gh-actions poetry
-          echo "package_version_short=`poetry version --short`.DEV.$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
-          echo "package_version_full=`poetry version`.DEV.$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
 
       - name: test with tox
         run: tox
@@ -74,6 +72,9 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install poetry tox tox-gh-actions
+          
+          echo "package_version_short=`poetry version --short`.DEV.$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+          echo "package_version_full=`poetry version`.DEV.$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
 
       - name: build documentation
         run: |
