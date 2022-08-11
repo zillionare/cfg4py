@@ -82,10 +82,15 @@ jobs:
           poetry run mike deploy "`poetry version --short`.dev"
           poetry run mike set-default "`poetry version --short`.dev"
 
+      - name: publish documentation
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          personal_token: ${{ secrets.PERSONAL_TOKEN }}
+          publish_dir: ./site
+
       - name: Build wheels and source tarball
         run: |
           poetry version $(poetry version --short)-dev.$GITHUB_RUN_NUMBER
-          poetry version --short
           poetry build
 
       - name: publish to Test PyPI
@@ -106,7 +111,8 @@ jobs:
           notify_when: 'success'
           title: Release ${{ github.ref }}
           text: |
-            ## 变更历史
-            ${{ steps.build_changelog.outputs.changelog }}
+            ## cfg4py ${{ github.ref }} 已完成构建
             ## 文档
-            https://zillionare.github.io/cfg4py
+            https://zillionare.github.io/cfg4py/history
+            ## 下载
+            https://test.pypi.org/project/cfg4py/

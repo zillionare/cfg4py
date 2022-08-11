@@ -92,7 +92,9 @@ jobs:
           notify_when: 'success'
           title: Release ${{ github.ref }}
           text: |
-            ## 变更历史
+            ## cfg4py ${{ github.ref }} 已发布
             ${{ steps.build_changelog.outputs.changelog }}
-            ## 文档
-            https://zillionare.github.io/cfg4py
+            ## 变更历史
+            https://zillionare.github.io/cfg4py/history
+            ## 下载
+            https://pypi.org/project/cfg4py
