@@ -108,7 +108,6 @@ jobs:
         env: 
           DINGTALK_ACCESS_TOKEN: ${{ secrets.DINGTALK_ACCESS_TOKEN }}
           DINGTALK_SECRET: ${{ secrets.DINGTALK_SECRET }}
-          VERSION: ${{ `poetry version --short`.dev.$GITHUB_RUN_NUMBER}}
         with:
           msgtype: markdown
           notify_when: 'success'
