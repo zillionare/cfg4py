@@ -54,7 +54,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install tox tox-gh-actions poetry
           echo "package_version_short=`poetry version --short`.DEV.$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
-          echo "package_version_full"=`poetry version`.DEV.$GITHUB_RUN_NUMBER >> $GITHUB_ENV
+          echo "package_version_full=`poetry version`.DEV.$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
 
       - name: test with tox
         run: tox
@@ -113,7 +113,7 @@ jobs:
           notify_when: 'success'
           title: Release ${{ env.package_version_full }}
           text: |
-            ## ${{ env.package_version_full }}完成构建
+            ## ${{ env.package_version_full }}构建成功
             ## 文档
             https://zillionare.github.io/cfg4py/history
             ## 下载
