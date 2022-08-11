@@ -106,12 +106,13 @@ jobs:
         env: 
           DINGTALK_ACCESS_TOKEN: ${{ secrets.DINGTALK_ACCESS_TOKEN }}
           DINGTALK_SECRET: ${{ secrets.DINGTALK_SECRET }}
+          VERSION: `poetry version --short`.dev.$GITHUB_RUN_NUMBER
         with:
           msgtype: markdown
           notify_when: 'success'
-          title: Release ${{ github.ref }}
+          title: Release ${{ VERSION }}
           text: |
-            ## cfg4py ${{ github.ref }} 已完成构建
+            ## cfg4py ${{ VERSION }} 已完成构建
             ## 文档
             https://zillionare.github.io/cfg4py/history
             ## 下载

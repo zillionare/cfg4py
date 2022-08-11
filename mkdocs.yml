@@ -61,6 +61,8 @@ plugins:
       watch:
         - cfg4py
 extra:
+  version:
+    provider: mike
   social:
     - icon: fontawesome/brands/twitter
       # replace with your own tweet link below
