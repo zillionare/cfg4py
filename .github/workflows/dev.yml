@@ -74,7 +74,7 @@ jobs:
       # declare env.package_version, env.package_version, env.package_name, env.repo_owner, env.repo_name, so you may use it in web hooks.
       - name: Declare variables for convenient use
         run: |
-          echo "package_version=`poetry version --short`" >> $GITHUB_ENV
+          echo "package_version=`poetry version --short`.DEV.$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
           echo "package_name=`poetry version | awk '{print $1}'`" >> $GITHUB_ENV
           echo "repo_owner=${GITHUB_REPOSITORY%/*}" >> $GITHUB_ENV
           echo "repo_name=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
@@ -118,7 +118,7 @@ jobs:
           title: CI Notification | Success
           text: |
             ### Build Success
-            ${{ env.package_name }}.${{ env.package_version }}-dev.$GITHUB_RUN_NUMBER  built successfully and published to test pypi
+            ${{ env.package_name }}.${{ env.package_version }} built successfully and published to test pypi
             ### Change History
             Please check change history at https://${{ env.repo_owner }}.github.io/${{ env.repo_name }}/history
             ### Package Download
