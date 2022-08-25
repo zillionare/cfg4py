@@ -1212,13 +1212,13 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 
 [extras]
 dev = ["tox", "pre-commit", "virtualenv", "pip", "twine", "toml", "black"]
-doc = ["mkdocs", "mkdocs-include-markdown-plugin", "mkdocs-material", "mkdocstrings", "mkdocs-autorefs"]
+doc = ["mkdocs", "mkdocs-include-markdown-plugin", "mkdocs-material", "mkdocstrings", "mkdocs-autorefs", "mike"]
 test = ["pytest", "isort", "flake8", "flake8-docstrings", "pytest-cov", "redis"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.7.1,<4.0"
-content-hash = "09d3d17a711c9ea2eaaa68afd4c4a37541a00c9fb9028ac4a5c9e7ea192e3303"
+content-hash = "8782d55d17e67e8a64da114f5bdbacac41322bc5e1d3b10d10a8965674aa4fa3"
 
 [metadata.files]
 apscheduler = [
