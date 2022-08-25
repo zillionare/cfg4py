@@ -1,7 +1,7 @@
 [tool]
 [tool.poetry]
 name = "cfg4py"
-version = "0.9.3"
+version = "0.9.4"
 homepage = "https://github.com/zillionare/cfg4py"
 description = "Easy config (template, auto-complete), hierarchichal design, monitor config change and load on-the-fly ."
 authors = ["Aaron Yang <aaron_yang@jieyu.ai>"]
@@ -42,7 +42,7 @@ mkdocs-material  = { version = "^8.1.11", optional = true}
 mkdocstrings  = { version = "^0.18.0", optional = true}
 mkdocs-material-extensions  = { version = "^1.0.3", optional = true}
 twine  = { version = "^3.8.0", optional = true}
-mkdocs-autorefs = {version = "^0.3.1", optional = true}
+mkdocs-autorefs = {version = "^0.4.1", optional = true}
 pre-commit = {version = "^2.17.0", optional = true}
 toml = {version = "^0.10.2", optional = true}
 livereload = {version = "^2.6.3", optional = true}
@@ -51,12 +51,11 @@ watchdog = "^2.1.9"
 APScheduler = "^3.9.1"
 "ruamel.yaml" = "^0.17.21"
 redis = {version = "^4.3.4", optional = true}
-mike = "^1.1.2"
+mike = { version="^1.1.2", optional=true}
 
 [tool.poetry.extras]
 test = [
     "pytest",
-    "black",
     "isort",
     "flake8",
     "flake8-docstrings",
@@ -64,7 +63,7 @@ test = [
     "redis"
     ]
 
-dev = ["tox", "pre-commit", "virtualenv", "pip", "twine", "toml"]
+dev = ["tox", "pre-commit", "virtualenv", "pip", "twine", "toml", "black"]
 
 doc = [
     "mkdocs",
@@ -97,6 +96,7 @@ exclude = '''
   | buck-out
   | build
   | dist
+  | .history
 )/
 '''
 [tool.isort]

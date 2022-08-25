@@ -4,14 +4,13 @@ name: dev build CI
 
 # Controls when the action will run.
 on:
-  # Triggers the workflow on push or pull request events but only for the master branch
+  # Triggers the workflow on push or pull request events
   push:
     branches:
       - '*'
   pull_request:
     branches:
       - '*'
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -29,7 +28,6 @@ jobs:
         os: [ubuntu-20.04]
     runs-on: ${{ matrix.os }}
 
-    # uncomment the following to pickup services
     services:
       redis:
         image: redis
@@ -73,12 +71,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry tox tox-gh-actions
           
-      - name: Declare variables for convention
+      # declare env.package_version, env.package_version, env.package_name, env.repo_owner, env.repo_name, so you may use it in web hooks.
+      - name: Declare variables for convenient use
         run: |
-          echo "package_version_short=`poetry version --short`.DEV.$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
-          echo "package_version_full=`poetry version`.DEV.$GITHUB_RUN_NUMBER" >> $GITHUB_ENV
+          echo "package_version=`poetry version --short`" >> $GITHUB_ENV
+          echo "package_name=`poetry version | awk '{print $1}'`" >> $GITHUB_ENV
           echo "repo_owner=${GITHUB_REPOSITORY%/*}" >> $GITHUB_ENV
           echo "repo_name=${GITHUB_REPOSITORY#*/}" >> $GITHUB_ENV
+        shell: bash
 
       - name: build documentation
         run: |
@@ -86,18 +86,17 @@ jobs:
           poetry run mkdocs build
           git config --global user.name Docs deploy
           git config --global user.email docs@dummy.bot.com
-          poetry run mike deploy "`poetry version --short`.dev"
-          poetry run mike set-default "`poetry version --short`.dev"
+          poetry run mike deploy -p -f --ignore "`poetry version --short`.dev"
+          poetry run mike set-default -p "`poetry version --short`.dev"
 
-      - name: publish documentation
-        uses: peaceiris/actions-gh-pages@v3
+      - uses: codecov/codecov-action@v3
         with:
-          personal_token: ${{ secrets.PERSONAL_TOKEN }}
-          publish_dir: ./site
-
+          fail_ci_if_error: true
+          files: coverage.xml
       - name: Build wheels and source tarball
         run: |
           poetry version $(poetry version --short)-dev.$GITHUB_RUN_NUMBER
+          poetry lock
           poetry build
 
       - name: publish to Test PyPI
@@ -109,18 +108,18 @@ jobs:
           skip_existing: true
 
       - name: Dingtalk Robot Notify
+        if: always()
         uses: leafney/dingtalk-action@v1.0.0
-        env: 
+        env:
           DINGTALK_ACCESS_TOKEN: ${{ secrets.DINGTALK_ACCESS_TOKEN }}
           DINGTALK_SECRET: ${{ secrets.DINGTALK_SECRET }}
         with:
           msgtype: markdown
-          notify_when: 'success'
           title: CI Notification | Success
           text: |
-            ### Build success
-            ${{ env.package_version_full }} is built and published to test pypi
+            ### Build Success
+            ${{ env.package_name }}.${{ env.package_version }} built successfully and published to test pypi
             ### Change History
             Please check change history at https://${{ env.repo_owner }}.github.io/${{ env.repo_name }}/history
-            ### package download
-            Please download the pacakge at: https://test.pypi.org/project/${{ env.repo_name }}/
+            ### Package Download
+            Please download the package at: https://test.pypi.org/project/${{ env.repo_name }}/

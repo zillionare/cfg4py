@@ -4,6 +4,8 @@
 !!! Info
     `(#{number})` means an issue of this project. You may check details of the issue by visiting https://github.com/zillionare/cfg4py/issues/_{number}_
 
+## 0.9.4 (2022-08-25)
+* lock apscheduler version to 3.9.1. APScheduler 4.0 has been refactored thus cause importing error.
 ## 0.9.3 (2022-06-03)
 
 * on apple m1, it's not able to watch file changes, and cause cfg4py fail. This revision will disable hot-reload in such scenario and user can still use all other functions of cfg4py.
