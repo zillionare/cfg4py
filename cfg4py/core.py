@@ -6,6 +6,7 @@ import re
 from collections.abc import Mapping
 from io import StringIO
 from pathlib import Path
+from typing import Any
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from ruamel.yaml import YAML
@@ -209,9 +210,9 @@ def _schema_from_obj_(obj, lines, depth: int = 0):
                 _type = f"{type(child)}"
                 _type = re.sub(r".*\'(.*)\'>", r"\1", _type)
                 if _type != "NoneType":
-                    lines.append(f"{' ' * 4 * depth}{name}: Optional[{_type}] = None\n")
+                    lines.append(f"{' ' * 4 * depth}{name}: {_type}\n")
                 else:
-                    lines.append(f"{' ' * 4 * depth}{name} = None\n")
+                    lines.append(f"{' ' * 4 * depth}{name}: Any\n")
                 lines.append("\n")
     else:
         print(obj)
@@ -328,6 +329,7 @@ def _load_and_replace_envar(content: str):
     Args:
         content (str): the content of configurations
     """
+    # 处理环境变量替换
     pattern = re.compile(r".*?\${(\w+)}.*?")
     match = pattern.findall(content)
     if match:
@@ -336,11 +338,18 @@ def _load_and_replace_envar(content: str):
             replaced = replaced.replace(
                 f"${{{g}}}", os.environ.get(g, f"ERROR_ENVAR_NOT_SET[{g}]")
             )
-        try:
-            return yaml.load(replaced)
-        except YAMLError as e:
-            logger.error("failed to parse:%s\n", content)
-            raise e
+        content = replaced
+
+    # 处理路径展开宏 ${path:~/.config/file}
+    path_pattern = re.compile(r".*?\${path:([^}]+)}.*?")
+    path_matches = path_pattern.findall(content)
+    if path_matches:
+        replaced = content
+        for path_expr in path_matches:
+            full_match = f"${{path:{path_expr}}}"
+            expanded_path = os.path.expanduser(path_expr)
+            replaced = replaced.replace(full_match, expanded_path)
+        content = replaced
 
     try:
         return yaml.load(content)

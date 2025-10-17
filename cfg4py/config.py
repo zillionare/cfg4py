@@ -1,5 +1,5 @@
 # noqa
-from typing import Optional
+from typing import Any
 
 
 class Config(object):

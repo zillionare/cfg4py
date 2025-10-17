@@ -1,8 +1,10 @@
-
 # History
 
 !!! Info
     `(#{number})` means an issue of this project. You may check details of the issue by visiting https://github.com/zillionare/cfg4py/issues/_{number}_
+
+## 0.12.0
+* Add path expansion macro support with `${path:...}` syntax
 
 ## 0.11.0
 * Fix: cfg4py build doesn't work
@@ -47,11 +49,3 @@
 ## 0.1.0 (2020-04-06)
 
 * First release on PyPI.
-
-
-
-
-
-
-
-

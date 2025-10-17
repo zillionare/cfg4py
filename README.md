@@ -20,6 +20,7 @@ A python config module that:
 5. Environment variables macro support
 6. Enable logging in one line
 7. Built on top of yaml
+8. Path expansion support
 
 ## Features
 
@@ -61,14 +62,12 @@ With other python config module, you have to remember all the configuration keys
 When cfg4py load raw settigns from yaml file, it'll compile all the settings into a Python class, then Cfg4Py let you access your settings by attributes. Compares the two ways to access configure item:
 
 ```python
-
-        cfg["services"]["redis"]["host"]
+cfg["services"]["redis"]["host"]
 ```
 vs:
 
 ```python
-
-        cfg.services.redis.host
+cfg.services.redis.host
 ```
 
 Apparently the latter is the better.
@@ -91,13 +90,24 @@ The best way to keep secret, is never share them. If you put account/password fi
 With cfg4py, you can set these secret as environment variables, then use marco in config files. For example, if you have the following in defaults.yaml (any other files will do too):
 
 ```text
-
-        postgres:
-                dsn: postgres://${postgres_account}:${postgres_password}@localhost
+postgres:
+    dsn: postgres://${postgres_account}:${postgres_password}@localhost:5432/postgres
 ```
 
 then cfg4py will lookup postgres_account, postgres_password from environment variables and make replacement.
 
+### Path expansion macro
+
+Cfg4py also supports path expansion in configuration files using the `${path:...}` macro syntax. This is especially useful for specifying file paths relative to the user's home directory:
+
+```text
+logging:
+    handlers:
+        file:
+            filename: ${path:~/logs/myapp.log}
+```
+
+When cfg4py processes this configuration, it will expand `~/logs/myapp.log` to the full path, for example `/home/user/logs/myapp.log`.
 
 ### Enable logging with one line
 

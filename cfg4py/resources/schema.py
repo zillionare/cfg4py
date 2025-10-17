@@ -1,5 +1,5 @@
 # noqa
-from typing import Optional
+from typing import Any
 
 
 class Config(object):
@@ -22,17 +22,17 @@ class Config(object):
     def __init__(self):
         raise TypeError("Do NOT instantiate this class")
 
-    tz: Optional[str] = None
+    tz: str
 
-    hello = None
+    hello: Any
 
     class services:
         class redis:
-            host: Optional[str] = None
+            host: str
 
-    foo: Optional[str] = None
+    foo: str
 
-    logging: Optional[dict] = None
+    logging: dict
 
     class aaron:
-        surname: Optional[str] = None
+        surname: str
