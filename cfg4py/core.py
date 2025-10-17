@@ -1,4 +1,5 @@
 """Main module."""
+
 import logging.config
 import os
 import re
@@ -91,7 +92,7 @@ def _mixin(d, u):
 
 def _to_obj(obj, conf: dict):
     for key, value in conf.items():
-        if type(value) == dict:
+        if isinstance(value, dict):
             _obj = Config()
             setattr(obj, key, _obj)
             _to_obj(_obj, value)

@@ -65,7 +65,7 @@ class TestCfg4Py(unittest.TestCase):
         core.build(os.path.join(self.resource_path, "schema.py"))
         try:
             sys.path.insert(0, self.resource_path)
-            
+
             # no exception means the file has been generated successfully
             self.assertTrue(True)
         except Exception:
@@ -291,7 +291,7 @@ class TestCfg4Py(unittest.TestCase):
         # according to issue #4, we should return logging settings
         cfg = cfg4py.init(self.resource_path)
         self.assertTrue(getattr(cfg, "logging", None))
-        self.assertTrue(cfg.logging.get("handlers"))        
+        self.assertTrue(cfg.logging.get("handlers"))
 
     @mock.patch("builtins.print")
     def test_version(self, mocked_print):

@@ -1,4 +1,5 @@
 """Top-level package for Cfg4Py."""
+
 from cfg4py.core import (
     RedisConfigFetcher,
     RemoteConfigFetcher,
