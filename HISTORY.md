@@ -4,13 +4,15 @@
 !!! Info
     `(#{number})` means an issue of this project. You may check details of the issue by visiting https://github.com/zillionare/cfg4py/issues/_{number}_
 
+## 0.11.0
+* Fix: cfg4py build doesn't work
 ## 0.9.4 (2022-08-25)
 * lock apscheduler version to 3.9.1. APScheduler 4.0 has been refactored thus cause importing error.
 ## 0.9.3 (2022-06-03)
 
 * on apple m1, it's not able to watch file changes, and cause cfg4py fail. This revision will disable hot-reload in such scenario and user can still use all other functions of cfg4py.
 * remove support for python 3.6 since it's out of service, and opt 3.10, 3.11 in
-* (#4) log settings are now available by `cfg.logging`. 
+* (#4) log settings are now available by `cfg.logging`.
 
 ## 0.9.2 (2021-12-17)
 

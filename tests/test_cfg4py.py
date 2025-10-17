@@ -180,7 +180,7 @@ class TestCfg4Py(unittest.TestCase):
             cmd.scaffold(self.output)
 
         # normal run
-        cmd.build(self.output)
+        cmd.build_schema(self.output)
         cfg = cfg4py.init(self.output, strict=True)
         self.assertEqual(cfg.postgres.dsn, "dbname=test user=postgres password=secret")
 
@@ -190,7 +190,7 @@ class TestCfg4Py(unittest.TestCase):
             with unittest.mock.patch(
                 "sys.exit", lambda *args: early_jump("Path not exists")
             ):
-                cmd.build(self.output)
+                cmd.build_schema(self.output)
             self.assertTrue(False, "sys.exit not triggered")
         except SystemExit:
             self.assertTrue(True)
@@ -201,7 +201,7 @@ class TestCfg4Py(unittest.TestCase):
             with unittest.mock.patch(
                 "sys.exit", lambda *args: early_jump("no files in folder")
             ):
-                cmd.build(self.output)
+                cmd.build_schema(self.output)
             self.assertTrue(False, "sys.exit not triggered")
         except SystemExit:
             self.assertTrue(True)

@@ -5,6 +5,7 @@ import os
 import re
 from collections.abc import Mapping
 from io import StringIO
+from pathlib import Path
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from ruamel.yaml import YAML
@@ -169,7 +170,7 @@ def config_remote_fetcher(fetcher: RemoteConfigFetcher, interval: int = 300):
     _scheduler.start()
 
 
-def build(save_to: str):
+def build(save_to: Path):
     global _cfg_obj
     with open(os.path.join(os.path.dirname(__file__), "config.py"), "r") as origin:
         lines = origin.readlines()

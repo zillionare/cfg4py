@@ -1,7 +1,7 @@
 [tool]
 [tool.poetry]
 name = "cfg4py"
-version = "0.10.0"
+version = "0.11.0"
 homepage = "https://github.com/zillionare/cfg4py"
 description = "Easy config (template, auto-complete), hierarchichal design, monitor config change and load on-the-fly ."
 authors = ["Aaron Yang <aaron_yang@jieyu.ai>"]

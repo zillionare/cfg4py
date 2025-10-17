@@ -4,6 +4,7 @@ from cfg4py.core import (
     RedisConfigFetcher,
     RemoteConfigFetcher,
     _cfg_obj,
+    build,
     config_remote_fetcher,
     config_server_role,
     enable_logging,
@@ -15,7 +16,7 @@ from cfg4py.core import (
 
 __author__ = """Aaron Yang"""
 __email__ = "code@jieyu.ai"
-__version__ = "0.9.3"
+__version__ = "0.10.1"
 
 
 def get_instance():
@@ -33,4 +34,5 @@ __all__ = [
     "envar",
     "get_instance",
     "get_config_dir",
+    "build",
 ]

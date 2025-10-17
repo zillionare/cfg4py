@@ -1,12 +1,13 @@
 import logging
 import os
 import sys
+from pathlib import Path
 from typing import Optional
 
 import fire
 from ruamel.yaml import YAML
 
-from cfg4py import enable_logging, envar, init
+from cfg4py import build, enable_logging, envar, init
 
 enable_logging()
 
@@ -26,7 +27,7 @@ class Command:
 
         self.transformed = self._transform()
 
-    def build(self, config_dir: str):
+    def build_schema(self, config_dir: str):
         """Compile configuration files into python script, which is used by IDE's
         auto-complete function
 
@@ -60,6 +61,7 @@ class Command:
         try:
             init(config_dir)
             sys.path.insert(0, config_dir)
+            build(Path(config_dir) / "schema.py")
             from schema import Config  # type: ignore # noqa
 
             output_file = f"{os.path.join(config_dir, 'schema')}"
@@ -240,7 +242,7 @@ def main():
     cmd = Command()  # pragma: no cover
     fire.Fire(
         {  # pragma: no cover
-            "build": cmd.build,
+            "build": cmd.build_schema,
             "scaffold": cmd.scaffold,
             "hint": cmd.hint,
             "set_server_role": cmd.set_server_role,
