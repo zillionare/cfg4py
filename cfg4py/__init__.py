@@ -1,4 +1,5 @@
 """Top-level package for Cfg4Py."""
+from typing import Any
 
 from cfg4py.core import (
     RedisConfigFetcher,
@@ -19,7 +20,7 @@ __email__ = "code@jieyu.ai"
 __version__ = "0.10.1"
 
 
-def get_instance():
+def get_instance()->Any:
     return _cfg_obj
 
 
